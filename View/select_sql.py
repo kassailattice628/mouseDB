@@ -5,7 +5,7 @@ import pandas as pd
 from tkinter import messagebox
 
 #Connect DB
-conn = sqlite3.connect("mouse_db.sqlite3")
+conn = sqlite3.connect("mouseDB.sqlite3")
 c = conn.cursor()
 
 #選択した条件でマウスを検索して表示
