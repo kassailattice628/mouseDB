@@ -98,7 +98,7 @@ def make_new_records(w):
 
 def select_new_sql(tree, w, ind):
     i = ind[0] - ind[1] + 1
-    sql="""
+    sql = """
     SELECT mouse_id, sex, status, line, user
     FROM individual
     WHERE mouse_id >= {}
@@ -114,6 +114,11 @@ def make_new_mate(w):
     id_male = w[1].get()
     id_female = w[2].get()
     start_date = w[3].get()
+
+    #登録されている mouseか確認
+    s = find_id(id_male, id_female)
+    if s == 0:
+        return 0
 
     #id_female の状態を取得
     state = find_state(id_female)
@@ -138,20 +143,20 @@ def make_new_mate(w):
 ### END if "make_new_mate"
 
 def select_new_mate_sql(tree, w, ind):
-    sql="""
+    sql = """
     SELECT mate_id, female_id, male_id, start_date, end_date, success
     FROM mate
     WHERE mate_id <= {}
     """.format(ind+9)
 
     Update_View(tree, sql)
-### END of "select_new_sql"
+### END of  select_new_sql ###
 
 def make_new_preg(w):
     #read from subwindow
     mate_id = w[1].get()
     # mate_id から motherの id を取得
-    sql="""
+    sql = """
         SELECT mouse_id FROM individual WHERE mate_id = 
         (SELECT mate_id FROM mate WHERE mate_id = "{}")
         """.format(mate_id)
@@ -170,10 +175,10 @@ def make_new_preg(w):
     conn.commit()
     last_i = c.lastrowid
     return last_i
-### END of "make_new_mate"
+### END of make_new_mate ###
 
 def select_new_preg_sql(tree, w, ind):
-    sql="""
+    sql = """
     SELECT preg_id, mate_id, success
     FROM pregnancy
     WHERE mate_id <= {}
@@ -190,7 +195,7 @@ def make_new_birth(w):
     birth_date = w[4].get()
 
     # preg_id から motherの id を取得
-    sql="""
+    sql = """
         SELECT mouse_id FROM individual WHERE mate_id = 
         (SELECT mate_id FROM mate WHERE mate_id = 
         (SELECT mate_id FROM pregnancy WHERE preg_id = "{}"))
@@ -215,9 +220,10 @@ def make_new_birth(w):
     make_success("birth", 1, "birth_id", last_i)
 
     return last_i
+### END OF make_new_birth ###
 
 def select_new_birth_sql(tree, w, ind):
-    sql="""
+    sql = """
     SELECT birth_id, preg_id, num_pup_male, num_pup_female, birth_date, success
     FROM birth
     WHERE birth_id <= {}
@@ -236,7 +242,7 @@ def make_new_wean(w):
     user = w[6].get()
 
     # birth_id から mother_id, father_id を取得
-    sql="""
+    sql = """
         SELECT female_id, male_id FROM mate WHERE mate_id = 
         (SELECT mate_id FROM pregnancy WHERE preg_id = 
         (SELECT preg_id FROM birth WHERE birth_id = "{}"))
@@ -262,7 +268,7 @@ def make_new_wean(w):
     make_success("wean", 1, "wean_id", last_i)
 
     #birth_date を取得
-    sql="""
+    sql = """
         SELECT birth_date FROM birth WHERE birth_id = "{}"
         """.format(birth_id)
     c.execute(sql)
@@ -283,10 +289,10 @@ def make_new_wean(w):
     # データ表示用
     return last_i
 
-
+##########
 def select_new_wean_sql(tree, w, ind):
     #表示
-    sql="""
+    sql = """
     SELECT wean_id, birth_id, num_pup_male, num_pup_female
     FROM wean
     WHERE wean_id <= {}
@@ -308,7 +314,7 @@ def make_retire(w):
     else:
         mouse_ids = range(int(id1), int(id2)+1)
         for i in mouse_ids:
-            sql="""
+            sql = """
                 UPDATE individual SET retire_date = "{}" WHERE mouse_id = "{}"
             """.format(end_date, i)
             c.execute(sql)
@@ -321,7 +327,7 @@ def make_retire(w):
 
 def select_retire_sql(tree, w, ind):
     if ind != 0:
-        sql="""
+        sql = """
             SELECT mouse_id, sex, status, retire_date
             FROM individual
             WHERE mouse_id <= "{}" AND status = 'R'
@@ -451,9 +457,29 @@ def make_success(name_table, success, name_id, i):
 
 def find_state(i):
     #mouse_id を受け取って status を返す
-    sql="""
+    sql = """
         SELECT status FROM individual WHERE mouse_id = "{}"
     """.format(i)
     c.execute(sql)
     s = c.fetchall()
     return  s[0][0]
+
+def find_id(i1, i2):
+
+    ii = 0
+    for i in (i1, i2):
+        if ii == 0:
+            sex = 'M'
+        elif ii == 1:
+            sex = 'F'
+    
+        sql =  """
+            SELECT mouse_id FROM individual WHERE mouse_id IN ("{}") AND sex = "{}";
+        """.format(i, sex)
+        c.execute(sql)
+        ans = c.fetchall()
+        if len(ans) == 0:
+            res = messagebox.showwarning("Error", "mouse_id: '{}' ('{}')is not appropriate!".format(i, sex))
+            print("showwarning", res)
+            return 0
+        ii += 1
