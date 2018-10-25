@@ -5,6 +5,7 @@ import tkinter.ttk as ttk
 import datetime
 
 from View import select_sql as ss
+from Utils import UnDo
 
 class select_list():
     def __init__(self):
@@ -82,9 +83,11 @@ class Frame(tk.LabelFrame):
         b6 = self.labeled_List("User: ", lists.users[1:], row2, 4, 0)
 
         a = myButton(self, text="Register", width=12)
-        a.grid(row=2, column=5)
+        a.grid(row=2, column=4)
+        c = myButton(self, text="UnDo", width=12)
+        c.grid(row=2, column=5)
 
-        return a, b1, b2, b3, b4, b5, b6
+        return a, b1, b2, b3, b4, b5, b6, c
 
     def new_mate(self):
         row=0
@@ -295,6 +298,8 @@ def new_buy_window():
     a = f.new_buy()
     a[0]["command"] = lambda:register(sub_tree.tree, a)
     sub_tree = ShowDB(sub, 20, "new")
+
+    a[-1]["command"] = lambda:UnDo.UnDo("new", a)
     return sub_tree
 
 def new_mate_window():
