@@ -350,7 +350,6 @@ def Get_unsuccess_id(n):
         WHERE mate_id
         """
         r = Get_set_diff(sql1, sql2, 'mate_id')
-        return r
 
     elif n == 'birth':
         sql1="""
@@ -365,7 +364,7 @@ def Get_unsuccess_id(n):
         """
 
         r = Get_set_diff(sql1, sql2, 'preg_id')
-        return r
+        print(len(r))
 
     elif n == 'wean':
         sql1="""
@@ -380,8 +379,11 @@ def Get_unsuccess_id(n):
         """
 
         r = Get_set_diff(sql1, sql2, 'birth_id')
-        print(r)
+    
+    if len(r) != 0:
         return r
+    else:
+        return ['None']
 
 ### END of "Get_mate_id"
 
