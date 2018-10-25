@@ -314,14 +314,19 @@ def make_retire(w):
     else:
         mouse_ids = range(int(id1), int(id2)+1)
         for i in mouse_ids:
-            sql = """
-                UPDATE individual SET retire_date = "{}" WHERE mouse_id = "{}"
-            """.format(end_date, i)
-            c.execute(sql)
-            conn.commit()
+            #state check
+            s = find_state(i)
+            if s != 'R':
+                sql = """
+                    UPDATE individual SET retire_date = "{}" WHERE mouse_id = "{}"
+                """.format(end_date, i)
+                c.execute(sql)
+                conn.commit()
 
-            change_state(i, 'R')
-            conn.commit()
+                change_state(i, 'R')
+                conn.commit()
+            else:
+                print('id:"{}" has already been "R".'.format(i))
 
         return int(id2)
 
