@@ -41,28 +41,28 @@ def select_sql(tree, w):
         cond2 = "birth_date BETWEEN {0} AND {1}".format(bd1,bd2)
 
     #SEX
-    if sex == "":
+    if sex == "Any":
         cond3 = "1"
     else:
         cond3 = 'sex = "{}"'.format(sex)
     #STATUS
-    if status == "":
-        cond4 = 'status = "B"'
+    if status == "Any":
+        cond4 = "1"
     else:
         cond4 = 'status = "{}"'.format(status)
     #GENE
-    if line == "":
+    if line == "Any":
         cond5 = "1"
     else:
         cond5 = 'line = "{}"'.format(line)
     #USER 
-    if user == "":
+    if user == "Any":
         cond6 = "1"
     else:
         cond6 = 'user = "{}"'.format(user)
 
     sql ="""
-    SELECT mouse_id, sex, status, line, user
+    SELECT mouse_id, sex, status, birth_date, line, user
     FROM individual
     WHERE {0} AND {1} AND {2} AND {3} AND {4} AND {5}
     ORDER BY mouse_id

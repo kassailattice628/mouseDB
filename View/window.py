@@ -9,20 +9,30 @@ from View import select_sql as ss
 class select_list():
     def __init__(self):
         self.menu = ("Buy", "Mate", "Pregnancy", "Birth", "Wean", "Retire")
-        self.sex = ("", "M", "F")
-        self.state = ("", "B","M","P","W","R")
-        self.line = ("", "C57BL/6N", "GAD67-GFP","VGAT-Venus","VGAT-tdTomato")
+        self.sex = ("Any", "M", "F")
+        self.state = ("Any", "B","M","P","W","R")
+        self.line = ("Any", "C57BL/6N", "GAD67-GFP","VGAT-Venus","VGAT-tdTomato")
         self.genotype = ("wt", "+/-", "-/-", "unknown")
-        self.users = ("", "KASAI")
+        self.users = ("Any", "KASAI")
 lists = select_list()
 
-def OpenWindow():
-    root = tk.Tk()
-    root.title("MOUSE DB_KASAI")
-    root.geometry("800x500")
-    return root
+class OpenWindow():
+    def __init__(self, title, size):
+        self.title = title
+        self.size = size
+        
+    def main(self):
+        root = tk.Tk()
+        root.title(self.title)
+        root.geometry(self.size)
+        return root
+        
+    def sub(self):
+        sub = tk.Toplevel()
+        sub.title(self.title)
+        sub.geometry(self.size)
+        return sub
 
-### Frame ###
 class Frame(tk.LabelFrame):
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
@@ -34,40 +44,28 @@ class Frame(tk.LabelFrame):
         self.configure(**kw)
         self.pack(fill="x")
 
-    #Frame 設定
     def create_event(self):
-        #texts = ["Buy", "Mate", "Pregnancy", "Birth", "Wean", "Retire"]
         callbacks = [new_buy_window, new_mate_window, new_pregnancy_window, new_birth_window, new_wean_window, retire_window]
         for i in range(0,6):
             a = myButton(self, text=lists.menu[i], command=callbacks[i])
             a.grid(row=0, column=i)
 
     def create_search(self):
-        #show Button
         a = myButton(self, text="Show DB")
         a.grid(row=0)
         row1 = 1
         row2 = 2
-        #ID, Birthday Entry
         b1 = self.labeled_Entry("ID from: ", row1, 0, 12)
         b2= self.labeled_Entry("to: ", row1, 2)
         b3 = self.labeled_Entry("Birth from: ", 1, 4)
         b4 = self.labeled_Entry("to: ", row1, 6)
-
         b5 = self.labeled_List("sex", lists.sex, row2, 0, 0)
-
         b6 = self.labeled_List("status", lists.state, row2, 2, 0)
-
         b7 = self.labeled_List("Gene", lists.line, row2, 4, 0)
-        
         b8 = self.labeled_List("User", lists.users, row2, 6, 0)
         return a, b1, b2, b3, b4, b5, b6, b7, b8
 
     def new_buy(self):
-        """
-        new male mice, new female mice, status="B", BirthDay,
-        line, genotype, userを入力させる
-        """
         row=0
         row2=1
         b1 = self.labeled_Entry("Num Males: ", row, 0, 12)
@@ -80,23 +78,15 @@ class Frame(tk.LabelFrame):
         b3.insert(tk.END, today_str)
 
         b4 = self.labeled_List("Gene: ", lists.line[1:], row2, 0, 0)
-
         b5 = self.labeled_List("Genotype: ", lists.genotype, row2, 2, 0)
-
         b6 = self.labeled_List("User: ", lists.users[1:], row2, 4, 0)
 
         a = myButton(self, text="Register", width=12)
         a.grid(row=2, column=5)
 
-        #showDB
         return a, b1, b2, b3, b4, b5, b6
 
     def new_mate(self):
-        """ new mate event
-        add new record in mate DB
-        select mother and father
-        line, genotype, userを入力させる
-        """
         row=0
         b1 = self.labeled_Entry("Father ID: ", row, 0, 12, 5)
         b1.insert(tk.END, "0")
@@ -112,8 +102,6 @@ class Frame(tk.LabelFrame):
         return a, b1, b2, b3
 
     def new_pregnancy(self):
-        #Drop list にする
-        #SQL で Mate success の success が null の mate_id を取り出す 
         val = ss.Get_unsuccess_id('pregnancy')
         b1 = self.labeled_List("Mate ID: ", val, 0, 0, 0)
 
@@ -122,8 +110,6 @@ class Frame(tk.LabelFrame):
         return a, b1
     
     def new_birth(self):
-        #Drop list で Pregnancy 選ばせる
-        #pup の数（male, female), birth_date を登録する
         row = 0
         row1= 1
         val = ss.Get_unsuccess_id('birth')
@@ -267,8 +253,8 @@ class ShowDB():
         return tree
 
     def show_select(self):
-        list_width = (10, 10, 10, 30)
-        list_text = ('ID','SEX','Status','Gene')
+        list_width = (5, 5, 5, 10,10)
+        list_text = ('ID','Sex','Status','BirthDay','Line', 'User')
         tree = self.show(list_width, list_text)
         return tree
 
@@ -302,33 +288,25 @@ class ShowDB():
         tree = self.show(list_width, list_text)
         return tree
 
-#### create subwindow ###
-
-def SubWindow(title, geometry):
-    sub=tk.Toplevel()
-    sub.title(title)
-    sub.geometry(geometry)
-    return sub
-
 ##### open sub window ###
 def new_buy_window():
-    sub = SubWindow("New Buy", "700x300")
-    f=Frame(sub, text="Select Menu")
+    sub = OpenWindow("New Buy", "700x300").sub()
+    f = Frame(sub, text="Select Menu")
     a = f.new_buy()
     a[0]["command"] = lambda:register(sub_tree.tree, a)
     sub_tree = ShowDB(sub, 20, "new")
     return sub_tree
 
 def new_mate_window():
-    sub = SubWindow("New Mate", "700x500")
-    f=Frame(sub, text="Select Menu")
+    sub = OpenWindow("New Mate", "700x500").sub()
+    f = Frame(sub, text="Select Menu")
     a = f.new_mate()
     a[0]["command"] = lambda:register_mate(sub_tree.tree, a)
     sub_tree = ShowDB(sub, 20, "mate")
     print("open new_mate")
 
 def new_pregnancy_window():
-    sub = SubWindow("New Pregnancy", "700x500")
+    sub = OpenWindow("New Pregnancy", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_pregnancy()
     a[0]["command"] = lambda:register_pregnancy(sub_tree.tree, a)
@@ -339,7 +317,7 @@ def new_pregnancy_window():
     print("open new_pregnancy")
 
 def new_birth_window():
-    sub = SubWindow("New Birth Event", "700x500")
+    sub = OpenWindow("New Birth Event", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_birth()
     a[0]["command"] = lambda:register_birth(sub_tree.tree, a)
@@ -350,7 +328,7 @@ def new_birth_window():
     print("open new_birth")
 
 def new_wean_window():
-    sub = SubWindow("New Wean Event", "700x500")
+    sub = OpenWindow("New Wean Event", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_wean()
     a[0]["command"] = lambda:register_wean(sub_tree.tree, a)
@@ -360,7 +338,7 @@ def new_wean_window():
     print("open new_wean")
 
 def retire_window():
-    sub = SubWindow("Retire", "700x500")
+    sub = OpenWindow("Retire", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.retire()
     a[0]["command"] = lambda:register_retire(sub_tree.tree, a)
