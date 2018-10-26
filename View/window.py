@@ -100,17 +100,21 @@ class Frame(tk.LabelFrame):
         today_str=today.strftime('%y%m%d')
         b3.insert(tk.END, today_str)
 
-        a = myButton(self, text="Register", width=15)
-        a.grid(row=1, column=6)
-        return a, b1, b2, b3
+        a = myButton(self, text="Register", width=12)
+        a.grid(row=1, column=4)
+        c = myButton(self, text="UnDo", width=12)
+        c.grid(row=1, column=5)
+        return a, b1, b2, b3, c
 
     def new_pregnancy(self):
         val = ss.Get_unsuccess_id('pregnancy')
         b1 = self.labeled_List("Mate ID: ", val, 0, 0, 0)
 
-        a = myButton(self, text="Register", width=15)
-        a.grid(row=0, column=4)
-        return a, b1
+        a = myButton(self, text="Register", width=12)
+        a.grid(row=0, column=3)
+        c = myButton(self, text="UnDo", width=12)
+        c.grid(row=0, column=4)
+        return a, b1, c
     
     def new_birth(self):
         row = 0
@@ -128,7 +132,9 @@ class Frame(tk.LabelFrame):
 
         a = myButton(self, text = "Register", width=12)
         a.grid(row=1, column=6)
-        return a, b1, b2, b3, b4
+        c = myButton(self, text="UnDo", width=12)
+        c.grid(row=2, column=6)
+        return a, b1, b2, b3, b4, c
 
     def new_wean(self):
         row = 0
@@ -144,8 +150,10 @@ class Frame(tk.LabelFrame):
         b6 = self.labeled_List("Users: ", lists.users[1:],  2, 0, 0)
 
         a = myButton(self, text = "Register", width=12)
-        a.grid(row=2, column=5)
-        return a, b1, b2, b3, b4, b5, b6
+        a.grid(row=2, column=4)
+        c = myButton(self, text="UnDo", width=12)
+        c.grid(row=2, column=5)
+        return a, b1, b2, b3, b4, b5, b6, c
 
     def retire(self):
         row = 0
@@ -157,8 +165,10 @@ class Frame(tk.LabelFrame):
         b3.insert(tk.END, today_str)
 
         a = myButton(self, text = "Register", width=12)
-        a.grid(row=1, column=5)
-        return a, b1, b2, b3
+        a.grid(row=1, column=4)
+        c = myButton(self, text="UnDo", width=12)
+        c.grid(row=1, column=5)
+        return a, b1, b2, b3, c
 
     def labeled_Entry(self, text, row, col, *args):
         if len(args) == 1:
@@ -308,7 +318,8 @@ def new_mate_window():
     a = f.new_mate()
     a[0]["command"] = lambda:register_mate(sub_tree.tree, a)
     sub_tree = ShowDB(sub, 20, "mate")
-    print("open new_mate")
+
+    a[-1]["command"] = lambda:UnDo.UnDo("mate", a)
 
 def new_pregnancy_window():
     sub = OpenWindow("New Pregnancy", "700x500").sub()
@@ -319,7 +330,8 @@ def new_pregnancy_window():
     
     sub_tree2 = ShowDB(sub, 20, "mate")
     ss.latest10(sub_tree2.tree, "pregnancy")
-    print("open new_pregnancy")
+
+    a[-1]["command"] = lambda:UnDo.UnDo("pregnancy", a)
 
 def new_birth_window():
     sub = OpenWindow("New Birth Event", "700x500").sub()
@@ -330,7 +342,7 @@ def new_birth_window():
 
     sub_tree2 = ShowDB(sub, 20, "pregnancy")
     ss.latest10(sub_tree2.tree, "birth")
-    print("open new_birth")
+    a[-1]["command"] = lambda:UnDo.UnDo("birth", a)
 
 def new_wean_window():
     sub = OpenWindow("New Wean Event", "700x500").sub()
@@ -340,7 +352,7 @@ def new_wean_window():
     sub_tree = ShowDB(sub, 20, "wean")
     sub_tree2 = ShowDB(sub, 20, "birth")
     ss.latest10(sub_tree2.tree, "wean")
-    print("open new_wean")
+    a[-1]["command"] = lambda:UnDo.UnDo("wean", a)
 
 def retire_window():
     sub = OpenWindow("Retire", "700x500").sub()
@@ -348,7 +360,7 @@ def retire_window():
     a = f.retire()
     a[0]["command"] = lambda:register_retire(sub_tree.tree, a)
     sub_tree = ShowDB(sub, 20, "retire")
-    print("open retire")
+    a[-1]["command"] = lambda:UnDo.UnDo("retire", a)
 
 ##### Register #####
 def register(tree, a):

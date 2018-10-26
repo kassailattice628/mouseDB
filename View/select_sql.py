@@ -157,8 +157,7 @@ def make_new_preg(w):
     mate_id = w[1].get()
     # mate_id から motherの id を取得
     sql = """
-        SELECT mouse_id FROM individual WHERE mate_id = 
-        (SELECT mate_id FROM mate WHERE mate_id = "{}")
+        SELECT female_id FROM mate WHERE mate_id = "{}"
         """.format(mate_id)
     c.execute(sql)
     id_female = c.fetchall()[0][0]
@@ -166,6 +165,8 @@ def make_new_preg(w):
     change_state(id_female, 'P')
     #"mate" success を 1 に変更
     make_success("mate", 1, "mate_id", mate_id)
+    #"mate"end_date を登録
+
     #pregnancy に新しい record を作成
     sql ="""
         INSERT INTO pregnancy(mate_id)
@@ -196,9 +197,8 @@ def make_new_birth(w):
 
     # preg_id から motherの id を取得
     sql = """
-        SELECT mouse_id FROM individual WHERE mate_id = 
-        (SELECT mate_id FROM mate WHERE mate_id = 
-        (SELECT mate_id FROM pregnancy WHERE preg_id = "{}"))
+        SELECT female_id FROM mate WHERE mate_id = 
+        (SELECT mate_id FROM pregnancy WHERE preg_id = "{}")
         """.format(preg_id)
     c.execute(sql)
     id_female = c.fetchall()[0][0]
@@ -211,7 +211,6 @@ def make_new_birth(w):
         INSERT INTO birth(preg_id, num_pup_male, num_pup_female, birth_date)
         VALUES ("{}", "{}", "{}", "{}")
         """.format(preg_id, num_male, num_female, birth_date)
-    print(sql)
     c.execute(sql)
     conn.commit()
     last_i = c.lastrowid
@@ -369,13 +368,12 @@ def Get_unsuccess_id(n):
         """
 
         r = Get_set_diff(sql1, sql2, 'preg_id')
-        print(len(r))
 
     elif n == 'wean':
         sql1="""
         SELECT birth_id
         FROM birth
-        WHERE success IS NULL
+        WHERE success = 1
         """
         sql2="""
         SELECT birth_id
@@ -419,14 +417,13 @@ def latest10(tree, which):
         # birth table を表示したい
         columns = "birth_id, preg_id, num_pup_male, num_pup_female, birth_date, success"
         table = "birth"
-        conditions = "success IS NULL AND birth_id >= (select MAX(birth_id) from birth) - 9"
+        conditions = "success IS 1 AND birth_id >= (select MAX(birth_id) from birth) - 9"
     
     sql = """
         SELECT {}
         FROM {}
         WHERE {}
         """.format(columns,table, conditions)
-    print(sql)
     
     Update_View(tree, sql)
 
