@@ -131,9 +131,9 @@ class Frame(tk.LabelFrame):
         b4.insert(tk.END, today_str)
 
         a = myButton(self, text = "Register", width=12)
-        a.grid(row=1, column=6)
+        a.grid(row=2, column=4)
         c = myButton(self, text="UnDo", width=12)
-        c.grid(row=2, column=6)
+        c.grid(row=2, column=5)
         return a, b1, b2, b3, b4, c
 
     def new_wean(self):
@@ -360,8 +360,8 @@ def retire_window():
     a = f.retire()
     a[0]["command"] = lambda:register_retire(sub_tree.tree, a)
     sub_tree = ShowDB(sub, 20, "retire")
-    a[-1]["command"] = lambda:UnDo.UnDo("retire", a)
-
+    #a[-1]["command"] = lambda:UnDo.UnDo("retire", a)
+    a[-1]["command"] = lambda: print('Undo for "retire" has not been supported yet.')
 ##### Register #####
 def register(tree, a):
     b = ss.make_new_records(a)
