@@ -119,6 +119,7 @@ def reset_status(table, c, conn):
             (SELECT preg_id FROM birth WHERE birth_id =
             (SELECT birth_id FROM wean WHERE wean_id =
             (SELECT MAX(wean_id) FROM wean)))))"""
+             
 
     c.execute(sql)
     conn.commit()

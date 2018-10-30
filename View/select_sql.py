@@ -409,9 +409,9 @@ def latest10(tree, which):
 
     elif which == "birth":
         # pregnancy table を表示したい
-        columns = "preg_id, mate_id, success"
-        table = "pregnancy"
-        conditions = "success IS NULL AND preg_id >= (select MAX(preg_id) from pregnancy) - 9"
+        columns = "p.preg_id, p.mate_id, m.male_id, m.female_id, p.success"
+        table = "pregnancy p JOIN mate m"
+        conditions = "p.success IS NULL AND p.preg_id >= (select MAX(p.preg_id)) - 9"
 
     elif which == "wean":
         # birth table を表示したい
