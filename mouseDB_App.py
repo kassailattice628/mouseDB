@@ -22,7 +22,7 @@ class mouseDB_App():
         a = f1.create_search()
         a[0]["command"]=lambda:select_sql.select_sql(tree.tree, a)
         #DB View
-        tree = window.ShowDB(root, 20, "new")
+        tree = window.ShowDB(root, 20, "buy")
         # start app
         root.mainloop()
 

@@ -4,7 +4,7 @@ from tkinter import messagebox as mbox
 
 class make_record():
     def __init__(self, which, params):
-        self.conn = sqlite3.connect('mouseDB2.sqlite3')
+        self.conn = sqlite3.connect('mouseDB.sqlite3')
         self.c = self.conn.cursor()
 
         self.which = which
@@ -17,6 +17,7 @@ class make_record():
             #空白除去
             p_str = p_str.replace(' ', '')
             self.p.append(p_str)
+        print(self.p)
 
     def register(self):
         if self.which == 'buy':
@@ -26,7 +27,7 @@ class make_record():
             num_i = num_m + num_f
             sex_str = ['M'] * num_m
             sex_str.extend(['F'] * num_f)
-            params = (self.p[3], self.p[4], self.p[2], 'null', 'null', self.p[5])
+            params = (self.p[3], self.p[4], self.p[2], None, None, self.p[5])
             add_new_records(num_i, sex_str, params, self.c)
             last_i = self.c.lastrowid
 
@@ -150,6 +151,7 @@ class make_record():
 
 ########## sub functions##########
 def add_new_records(n, sex, p, c):
+    print(p)
     #n:num_pups, p:parameters, c:cursor
     for i in range(0, n):
         sql = """

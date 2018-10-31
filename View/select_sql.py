@@ -96,18 +96,6 @@ def make_new_records(w):
     return last_i, num_i
 ### END of "new_registers"
 
-def select_new_sql(tree, w, ind):
-    i = ind[0] - ind[1] + 1
-    sql = """
-    SELECT mouse_id, sex, status, line, user
-    FROM individual
-    WHERE mouse_id >= {}
-    ORDER BY mouse_id
-    """.format( i )
-
-    Update_View(tree, sql)
-### END of "select_new_sql"
-
 ## mate イベントの作成
 def make_new_mate(w):
     #read from subwindow
@@ -142,16 +130,6 @@ def make_new_mate(w):
 
 ### END if "make_new_mate"
 
-def select_new_mate_sql(tree, w, ind):
-    sql = """
-    SELECT mate_id, female_id, male_id, start_date, end_date, success
-    FROM mate
-    WHERE mate_id <= {}
-    """.format(ind+9)
-
-    Update_View(tree, sql)
-### END of  select_new_sql ###
-
 def make_new_preg(w):
     #read from subwindow
     mate_id = w[1].get()
@@ -177,16 +155,6 @@ def make_new_preg(w):
     last_i = c.lastrowid
     return last_i
 ### END of make_new_mate ###
-
-def select_new_preg_sql(tree, w, ind):
-    sql = """
-    SELECT preg_id, mate_id, success
-    FROM pregnancy
-    WHERE mate_id <= {}
-    """.format(ind+9)
-    
-    Update_View(tree, sql)
-### END of "select_new_sql"
 
 def make_new_birth(w):
     #read params from sub window
@@ -221,14 +189,6 @@ def make_new_birth(w):
     return last_i
 ### END OF make_new_birth ###
 
-def select_new_birth_sql(tree, w, ind):
-    sql = """
-    SELECT birth_id, preg_id, num_pup_male, num_pup_female, birth_date, success
-    FROM birth
-    WHERE birth_id <= {}
-    ORDER BY birth_id DESC
-    """.format(ind+9)
-    Update_View(tree, sql)
 
 ##########
 def make_new_wean(w):
@@ -289,15 +249,8 @@ def make_new_wean(w):
     return last_i
 
 ##########
-def select_new_wean_sql(tree, w, ind):
-    #表示
-    sql = """
-    SELECT wean_id, birth_id, num_pup_male, num_pup_female
-    FROM wean
-    WHERE wean_id <= {}
-    ORDER BY wean_id DESC
-    """.format(ind+9)
-    Update_View(tree, sql)
+
+
 
 def make_retire(w):
     #id 範囲指定
@@ -316,73 +269,45 @@ def make_retire(w):
             #state check
             s = find_state(i)
             if s != 'R':
+                #end_date 登録
                 sql = """
-                    UPDATE individual SET retire_date = "{}" WHERE mouse_id = "{}"
-                """.format(end_date, i)
+                UPDATE individual
+                SET retire_date = {}
+                WHERE mouse_id = {}
+                """ .format(end_date, str(i))
                 c.execute(sql)
-                conn.commit()
-
+                #
                 change_state(i, 'R')
                 conn.commit()
             else:
-                print('id:"{}" has already been "R".'.format(i))
+                print('id:"{}" has already been set  "R".'.format(i))
 
         return int(id2)
-
-def select_retire_sql(tree, w, ind):
-    if ind != 0:
-        sql = """
-            SELECT mouse_id, sex, status, retire_date
-            FROM individual
-            WHERE mouse_id <= "{}" AND status = 'R'
-            ORDER BY mouse_id DESC
-        """.format(ind+9)
-        Update_View(tree, sql)
     
-
 # Preg, Birt, Wean で表示する Mate (success = NULL のもの) を表示
-def Get_unsuccess_id(n):
-    if n == 'pregnancy':
-        # mate の success が Null の mate_id かつ, pregnancy に登録されていない mate_id を取得
-        sql1="""
-        SELECT mate_id
-        FROM mate
-        """
-        sql2="""
-        SELECT mate_id
-        FROM pregnancy
-        WHERE mate_id
-        """
-        r = Get_set_diff(sql1, sql2, 'mate_id')
+def get_unsuccess_id(which):
+    if which == 'pregnancy':
+        name_id = 'mate_id'
+        name_table = 'mate'
+        cond = 'null'
 
-    elif n == 'birth':
-        sql1="""
-        SELECT preg_id
-        FROM pregnancy
-        WHERE success IS NULL
-        """
-        sql2="""
-        SELECT preg_id
-        FROM birth
-        WHERE preg_id
-        """
+    elif which == 'birth':
+        name_id = 'preg_id'
+        name_table = 'pregnancy'
+        cond = 'null'
 
-        r = Get_set_diff(sql1, sql2, 'preg_id')
+    elif which == 'wean':
+        name_id = 'birth_id'
+        name_table = 'birth'
+        cond = '1'
 
-    elif n == 'wean':
-        sql1="""
-        SELECT birth_id
-        FROM birth
-        WHERE success = 1
-        """
-        sql2="""
-        SELECT birth_id
-        FROM wean
-        WHERE birth_id
-        """
+    sql = """
+    SELECT {} FROM {} WHERE success IS {}
+    """.format(name_id, name_table, cond)
+    df = pd.read_sql_query(sql, conn)
 
-        r = Get_set_diff(sql1, sql2, 'birth_id')
-    
+    r = df[name_id].unique()
+    r = [str(i) for i in r]
     if len(r) != 0:
         return r
     else:
@@ -399,6 +324,126 @@ def Get_set_diff(sql1, sql2, i):
     r = [str(n) for n in r]
     return r
 
+
+########## 未設定のデータを表示 ##########
+def select_new(tree, ind, which):
+    if which == 'buy':
+        i = ind[0] - ind[1] + 1
+        sql = """
+        SELECT mouse_id, sex, status, line, user
+        FROM individual
+        WHERE mouse_id >= {}
+        ORDER BY mouse_id
+        """.format( i )
+        
+    elif which == 'mate':
+        sql = """
+        SELECT mate_id, female_id, male_id, start_date, end_date, success
+        FROM mate
+        WHERE mate_id <= {}
+        """.format(ind+9)
+
+    elif which == 'pregnancy':
+        sql = """
+        SELECT h.preg_id, h.mate_id, p.success
+        FROM history h JOIN pregnancy p ON h.preg_id = p.preg_id
+        WHERE h.mate_id <= {}
+        """.format(ind+9)
+
+    elif which == 'birth':
+        sql = """
+        SELECT h.birth_id, h.preg_id, b.num_pup_male, b.num_pup_female, b.birth_date, b.success
+        FROM history h JOIN birth b ON h.birth_id = b.birth_id
+        WHERE b.birth_id <= {}
+        ORDER BY b.birth_id DESC
+        """.format(ind+9)
+
+    elif which == 'wean':
+        sql = """
+        SELECT h.wean_id, birth_id, num_pup_male, num_pup_female
+        FROM wean
+        WHERE wean_id <= {}
+        ORDER BY wean_id DESC
+        """.format(ind+9)
+
+    elif which == 'retire':
+        if ind != 0:
+            sql = """
+            SELECT mouse_id, sex, status, retire_date
+            FROM individual
+            WHERE mouse_id <= "{}" AND status = 'R'
+            ORDER BY mouse_id DESC
+            """.format(ind+9)
+        else:
+            print(" no mice are selected!")
+        #表示    
+        Update_View(tree, sql)
+        
+def select_new_sql(tree, w, ind):
+    i = ind[0] - ind[1] + 1
+    sql = """
+    SELECT mouse_id, sex, status, line, user
+    FROM individual
+    WHERE mouse_id >= {}
+    ORDER BY mouse_id
+    """.format( i )
+
+    Update_View(tree, sql)
+### END of "select_new_sql"
+
+def select_new_mate_sql(tree, w, ind):
+    sql = """
+    SELECT mate_id, female_id, male_id, start_date, end_date, success
+    FROM mate
+    WHERE mate_id <= {}
+    """.format(ind+9)
+
+    Update_View(tree, sql)
+### END of  select_new_sql ###
+
+def select_new_preg_sql(tree, w, ind):
+    sql = """
+    SELECT h.preg_id, h.mate_id, p.success
+    FROM history h JOIN pregnancy p ON h.preg_id = p.preg_id
+    WHERE h.mate_id <= {}
+    """.format(ind+9)
+    
+    Update_View(tree, sql)
+### END of "select_new_sql"
+
+def select_new_birth_sql(tree, w, ind):
+    sql = """
+    SELECT birth_id, preg_id, num_pup_male, num_pup_female, birth_date, success
+    FROM birth
+    WHERE birth_id <= {}
+    ORDER BY birth_id DESC
+    """.format(ind+9)
+    Update_View(tree, sql)
+
+def select_new_wean_sql(tree, w, ind):
+    #表示
+    sql = """
+    SELECT wean_id, birth_id, num_pup_male, num_pup_female
+    FROM wean
+    WHERE wean_id <= {}
+    ORDER BY wean_id DESC
+    """.format(ind+9)
+    Update_View(tree, sql)
+
+def select_retire_sql(tree, w, ind):
+    if ind != 0:
+        sql = """
+            SELECT mouse_id, sex, status, retire_date
+            FROM individual
+            WHERE mouse_id <= "{}" AND status = 'R'
+            ORDER BY mouse_id DESC
+        """.format(ind+9)
+        Update_View(tree, sql)
+
+
+
+
+
 ########## 最新 10 のデータを表示 ##########
 def latest10(tree, which):
     if which == "pregnancy":
@@ -409,15 +454,15 @@ def latest10(tree, which):
 
     elif which == "birth":
         # pregnancy table を表示したい
-        columns = "p.preg_id, p.mate_id, m.male_id, m.female_id, p.success"
-        table = "pregnancy p JOIN mate m"
-        conditions = "p.success IS NULL AND p.preg_id >= (select MAX(p.preg_id)) - 9"
+        columns = "h.preg_id, h.mate_id, m.male_id, m.female_id"
+        table = "history h JOIN mate m ON h.mate_id = m.mate_id JOIN pregnancy p ON h.preg_id = p.preg_id"
+        conditions = "p.success IS NULL AND p.preg_id >= (select MAX(preg_id) FROM pregnancy) - 9"
 
     elif which == "wean":
         # birth table を表示したい
-        columns = "birth_id, preg_id, num_pup_male, num_pup_female, birth_date, success"
-        table = "birth"
-        conditions = "success IS 1 AND birth_id >= (select MAX(birth_id) from birth) - 9"
+        columns = "h.birth_id, h.preg_id, m.female_id, b.num_pup_male, b.num_pup_female, b.birth_date"
+        table = "history h JOIN birth b ON h.birth_id = b.birth_id JOIN mate m ON h.mate_id = m.mate_id"
+        conditions = "b.success IS 1 AND b.birth_id >= (select MAX(birth_id) FROM birth) - 9"
     
     sql = """
         SELECT {}
