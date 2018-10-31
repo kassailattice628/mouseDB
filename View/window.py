@@ -374,4 +374,4 @@ def do_test(tree, a, which):
     r = test.make_record(which, a)
     b = r.register()
     ss.select_new(tree, b, which)
-
+    

@@ -2,7 +2,7 @@
 ##########
 import sqlite3
 import pandas as pd
-from tkinter import messagebox
+from tkinter import messagebox as mbox
 
 #Connect DB
 conn = sqlite3.connect("mouseDB.sqlite3")
@@ -101,6 +101,7 @@ def get_unsuccess_id(which):
 def select_new(tree, ind, which):
     if which == 'buy':
         i = ind[0] - ind[1] + 1
+        print(ind)
         sql = """
         SELECT mouse_id, sex, status, line, user
         FROM individual
@@ -192,3 +193,130 @@ def Update_View(tree, sql):
         if i & 1:
             tree.tag_configure(i, background="#CCFFFF")
         i += 1
+
+
+### sub functions for make_record ###
+
+########## UPDATE DB ##########
+def add_new_records(n, sex, p):
+    #n:num_pups, p:parameters, c:cursor
+    print(n)
+    print(sex)
+    print(p)
+    for i in range(0, n):
+        sql = """
+        INSERT INTO individual (sex, line, genotype, birth_date, father_id, mother_id, user) VALUES (?, ?, ?, ?, ?, ?, ?)
+        """
+        c.execute(sql, (sex[i], p[0], p[1], p[2], p[3], p[4], p[5]))
+    last_i = c.lastrowid
+    conn.commit()
+    return last_i
+
+def add_to_history(which, i, mate_id = []):
+    if which == 'mate_id':
+        sql = """
+        INSERT INTO history(mate_id) values("{}")
+        """.format(i)
+    else:
+        sql = """
+        UPDATE history SET "{}" = "{}" WHERE mate_id = "{}"
+        """.format(which, i, mate_id)
+
+    c.execute(sql)
+    conn.commit()
+
+def change_state(i, state):
+    if state == "None":
+        pass
+    else:
+        sql ="""
+            UPDATE individual
+            SET status = "{}"
+            WHERE mouse_id = "{}"
+        """.format(state, i)
+        c.execute(sql)
+        conn.commit()
+
+def make_success(name_table, val, name_id, i):
+    sql = """ 
+    UPDATE "{}" SET success = "{}" WHERE "{}" = "{}"
+    """.format(name_table, val, name_id, i)
+    c.execute(sql)
+    conn.commit()
+
+
+########## serach ##########
+def find_mate_ids(which, i):
+    if which == 'pregnancy':
+        name = 'mate_id'
+    elif which == 'birth':
+        name = 'preg_id'
+    elif which == 'wean':
+        name = 'birth_id'
+
+    sql = """
+    SELECT mate_id, male_id, female_id FROM mate WHERE mate_id = (
+        SELECT mate_id FROM history WHERE {} = "{}")
+    """.format(name, i)
+    c.execute(sql)
+    ans = c.fetchall()[0]
+    return ans
+
+def get_female_status(female_id):
+    sql = """
+    SELECT status FROM individual WHERE mouse_id = "{}"
+    """.format(female_id)
+    c.execute(sql)
+    ans = c.fetchall()[0][0]
+    return(ans)
+
+def get_status(i):
+    sql = """
+    SELECT status FROM individual WHERE mouse_id = "{}"
+    """.format(i)
+    c.execute(sql)
+    ans = c.fetchall()[0][0]
+    return ans
+
+def get_birthday(mate_id):
+    sql = """
+    SELECT birth_date FROM birth WHERE birth_id =
+    (SELECT birth_id FROM history WHERE mate_id = "{}")
+    """.format(mate_id)
+    c.execute(sql)
+    ans = c.fetchall()[0][0]
+    return(ans)
+
+######### validate ids ##########
+def check_id(list_id):
+    for i in (0, 1):
+        sql = """
+        SELECT mouse_id FROM individual WHERE mouse_id IN ("{}")
+        """.format(list_id[i])
+        c.execute(sql)
+        ans = c.fetchall()
+        if len(ans) == 0:
+            show_warrn("""mouse_id:"{}" is not in the DB!""".format(list_id[i]))
+            return 0
+    return 1
+
+def check_sex(list_id):
+    sex = ['M', 'F']
+    for i in (0,1):
+        if get_sex(list_id[i]) != sex[i]:
+            show_warrn("""sex of mouse_id:"{}" is not appropriate!""".format(list_id[i]))
+            return 0
+    return 1
+
+def get_sex(i):
+    sql = """
+    SELECT sex FROM individual WHERE mouse_id = "{}"
+    """.format(i)
+    c.execute(sql)
+    return c.fetchall()[0][0]
+
+##########
+def show_warrn(text):
+    res = mbox.showwarning("title", text)
+    print("showwarning", res)
+    return 0

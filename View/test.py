@@ -1,6 +1,7 @@
 """ データ登録用の Class，window の情報を読んで，チェックして，登録．id 情報を返す""" 
 import sqlite3
 from tkinter import messagebox as mbox
+from View import select_sql as ss
 
 class make_record():
     def __init__(self, which, params):
@@ -28,10 +29,10 @@ class make_record():
             sex_str = ['M'] * num_m
             sex_str.extend(['F'] * num_f)
             params = (self.p[3], self.p[4], self.p[2], None, None, self.p[5])
-            add_new_records(num_i, sex_str, params, self.c)
-            last_i = self.c.lastrowid
-
-            self.conn.commit()
+            last_i = ss.add_new_records(num_i, sex_str, params)
+            #add_new_records(num_i, sex_str, params, self.c)
+            #last_i = self.c.lastrowid
+            # self.conn.commit()
             return last_i, num_i
 
         ###################
@@ -39,14 +40,15 @@ class make_record():
             #p: 0:id_male, 1:id_female, 2:start_date
 
             # chekc whether male and female are registered.
-            v1 = check_id(self.p[0:2], self.c)
-            v2 = check_sex(self.p[0:2], self.c)
+            v1 = ss.check_id(self.p[0:2])
+            v2 = ss.check_sex(self.p[0:2])
 
             if v1 == 0 or v2 == 0:
                 return 0
 
             # get female state
-            f_state = get_female_status(self.p[1], self.c)
+            #f_state = ss.get_female_status(self.p[1])
+            f_state = ss.get_status(self.p[1])
 
             # add new mate record
             if f_state == 'B':
@@ -55,13 +57,15 @@ class make_record():
                 """
                 self.c.execute(sql, self.p[0:3])
                 last_i = self.c.lastrowid
+                self.conn.commit()
 
-                change_state(self.p[1], 'M', self.c)
+                #change_state(self.p[1], 'M', self.c)
+                ss.change_state(self.p[1], 'M')
 
                 # add mate_id into history
-                add_to_history("mate_id", last_i, self.c, self.conn)
+                #add_to_history("mate_id", last_i, self.c)
+                ss.add_to_history("mate_id", last_i)
 
-                self.conn.commit()
                 print("commit a mate event")
                 return last_i
             else:
@@ -71,9 +75,9 @@ class make_record():
         ###################
         elif self.which == 'pregnancy':
             #p: 0:id_mate
-            ids = find_mate_ids(self.which, self.p[0], self.c)
+            ids = ss.find_mate_ids(self.which, self.p[0])
 
-            change_state(ids[2], 'P', self.c)
+            ss.change_state(ids[2], 'P')
 
             make_success("mate", 1, "mate_id", self.p[0], self.c)
             # mate.end_date を登録
@@ -85,18 +89,18 @@ class make_record():
             """
             self.c.execute(sql)
             last_i = self.c.lastrowid
-
-            add_to_history("preg_id", last_i, self.c, mate_id = self.p[0])
-
             self.conn.commit()
+
+            ss.add_to_history("preg_id", last_i, mate_id = self.p[0])
+
             print("commit a pregnancy event")
             return last_i
 
         ####################
         elif self.which == 'birth':
             #p: 0:id_preg, 1:#male_pups, 2:#female_pups, 3:birth_date
-            ids = find_mate_ids(self.which, self.p[0], self.c)
-            change_state(ids[2], 'W', self.c)
+            ids = ss.find_mate_ids(self.which, self.p[0])
+            ss.change_state(ids[2], 'W')
             make_success("pregnancy", 1, "preg_id", self.p[0], self.c)
 
             #update birth table
@@ -112,9 +116,10 @@ class make_record():
             self.c.execute(sql, val)
             #今登録したbirth_id
             last_i = self.c.lastrowid
-
-            add_to_history("birth_id", last_i, self.c, mate_id = ids[0])
             self.conn.commit()
+
+            ss.add_to_history("birth_id", last_i, mate_id = ids[0])
+            
             print("commit a birth event")
             return last_i
 
@@ -123,9 +128,9 @@ class make_record():
             num_m = int(self.p[1])
             num_f = int(self.p[2])
 
-            ids = find_mate_ids(self.which, self.p[0], self.c)
-            bd = get_birthday(ids[0], self.c)
-            change_state(ids[2], 'B', self.c)
+            ids = ss.find_mate_ids(self.which, self.p[0])
+            bd = ss.get_birthday(ids[0])
+            ss.change_state(ids[2], 'B')
             if num_m == 0 and num_f== 0:
                 success = 0
                 print("no mice wean")
@@ -137,6 +142,8 @@ class make_record():
             val = (self.p[1], self.p[2], success)
             self.c.execute(sql, val)
             last_i = self.c.lastrowid
+            self.conn.commit()
+
             add_to_history("wean_id", last_i, self.c, mate_id = ids[0])
 
             #insert new mice into individual
@@ -145,9 +152,10 @@ class make_record():
             sex_str.extend(['F'] * num_f)
 
             params = (self.p[3], self.p[4], bd, ids[1], ids[2], self.p[5])
-            add_new_records(num_i, sex_str, params, self.c)
+            #add_new_records(num_i, sex_str, params, self.c)
+            last_i = ss.add_new_records(num_i, sex_str, params)
 
-            self.conn.commit()
+            #self.conn.commit()
             print("commit a birth event")
             return last_i
 
@@ -158,21 +166,21 @@ class make_record():
                 return 0
             
             #0:id from, 1: id to, 2: retire date
-            v1 = check_id(self.p[0:2], self.c)
+            v1 = ss.check_id(self.p[0:2])
             if v1 == 0:
                 return 0
             
             ids = range(int(self.p[0]), int(self.p[1])+1)
             for i in ids:
-                s = find_state(i, self.c)
+                s = ss.get_status(i)
                 if s != 'R':
                     sql = """ 
                     UPDATE individual SET retire_date = {} WHERE mouse_id = {}
                     """.format(self.p[2], str(i))
                     self.c.execute(sql)
-                    
-                    change_state(i, 'R', self.c)
                     self.conn.commit()
+                    
+                    ss.change_state(i, 'R')
                 else:
                     print('id:"{}" has already been set as "R".'.format(i))
             return int(self.p[1])
