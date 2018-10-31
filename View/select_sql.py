@@ -133,12 +133,16 @@ def select_new(tree, ind, which):
         """.format(ind+9)
 
     elif which == 'wean':
-        sql = """
-        SELECT h.wean_id, h.birth_id, m.female_id, w.num_pup_male, w.num_pup_female
-        FROM history h JOIN wean w ON h.wean_id = w.wean_id JOIN mate m ON h.mate_id = m.mate_id
-        WHERE w.wean_id <= {}
-        ORDER BY w.wean_id DESC
-        """.format(ind+9)
+        if ind != 0:
+            sql = """
+            SELECT h.wean_id, h.birth_id, m.female_id, w.num_pup_male, w.num_pup_female
+            FROM history h JOIN wean w ON h.wean_id = w.wean_id JOIN mate m ON h.mate_id = m.mate_id
+            WHERE w.wean_id <= {}
+            ORDER BY w.wean_id DESC
+            """.format(ind+9)
+        else:
+            sql = 0
+            print(" wean failure!")
 
     elif which == 'retire':
         #check id
@@ -296,7 +300,7 @@ def check_id(list_id):
         c.execute(sql)
         ans = c.fetchall()
         if len(ans) == 0:
-            show_warrn("""mouse_id:"{}" is not in the DB!""".format(list_id[i]))
+            show_warn("""mouse_id:"{}" is not in the DB!""".format(list_id[i]))
             return 0
     return 1
 
@@ -304,7 +308,7 @@ def check_sex(list_id):
     sex = ['M', 'F']
     for i in (0,1):
         if get_sex(list_id[i]) != sex[i]:
-            show_warrn("""sex of mouse_id:"{}" is not appropriate!""".format(list_id[i]))
+            show_warn("""sex of mouse_id:"{}" is not appropriate!""".format(list_id[i]))
             return 0
     return 1
 
@@ -315,8 +319,8 @@ def get_sex(i):
     c.execute(sql)
     return c.fetchall()[0][0]
 
-##########
-def show_warrn(text):
+
+def show_warn(text):
     res = mbox.showwarning("title", text)
     print("showwarning", res)
     return 0

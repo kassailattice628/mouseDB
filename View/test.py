@@ -1,6 +1,6 @@
-""" データ登録用の Class，window の情報を読んで，チェックして，登録．id 情報を返す""" 
+""" View/test.py"""
+
 import sqlite3
-from tkinter import messagebox as mbox
 from View import select_sql as ss
 
 class make_record():
@@ -30,9 +30,6 @@ class make_record():
             sex_str.extend(['F'] * num_f)
             params = (self.p[3], self.p[4], self.p[2], None, None, self.p[5])
             last_i = ss.add_new_records(num_i, sex_str, params)
-            #add_new_records(num_i, sex_str, params, self.c)
-            #last_i = self.c.lastrowid
-            # self.conn.commit()
             return last_i, num_i
 
         ###################
@@ -46,8 +43,6 @@ class make_record():
             if v1 == 0 or v2 == 0:
                 return 0
 
-            # get female state
-            #f_state = ss.get_female_status(self.p[1])
             f_state = ss.get_status(self.p[1])
 
             # add new mate record
@@ -59,17 +54,14 @@ class make_record():
                 last_i = self.c.lastrowid
                 self.conn.commit()
 
-                #change_state(self.p[1], 'M', self.c)
                 ss.change_state(self.p[1], 'M')
 
-                # add mate_id into history
-                #add_to_history("mate_id", last_i, self.c)
                 ss.add_to_history("mate_id", last_i)
 
                 print("commit a mate event")
                 return last_i
             else:
-                mbox.showwarning("""status of id:"{}" is not 'B'""".format(self.p[1]))
+                ss.show_warn("status of id:'{}' is not 'B'".format(self.p[1]))
                 return 0
 
         ###################
@@ -79,7 +71,7 @@ class make_record():
 
             ss.change_state(ids[2], 'P')
 
-            make_success("mate", 1, "mate_id", self.p[0], self.c)
+            ss.make_success("mate", 1, "mate_id", self.p[0])
             # mate.end_date を登録
             # ~~~~~
             #
@@ -101,7 +93,7 @@ class make_record():
             #p: 0:id_preg, 1:#male_pups, 2:#female_pups, 3:birth_date
             ids = ss.find_mate_ids(self.which, self.p[0])
             ss.change_state(ids[2], 'W')
-            make_success("pregnancy", 1, "preg_id", self.p[0], self.c)
+            ss.make_success("pregnancy", 1, "preg_id", self.p[0])
 
             #update birth table
             if int(self.p[1]) == 0 and int(self.p[2]) == 0:
@@ -114,7 +106,6 @@ class make_record():
             """
             val = (self.p[1], self.p[2], self.p[3], success)
             self.c.execute(sql, val)
-            #今登録したbirth_id
             last_i = self.c.lastrowid
             self.conn.commit()
 
@@ -131,6 +122,7 @@ class make_record():
             ids = ss.find_mate_ids(self.which, self.p[0])
             bd = ss.get_birthday(ids[0])
             ss.change_state(ids[2], 'B')
+
             if num_m == 0 and num_f== 0:
                 success = 0
                 print("no mice wean")
@@ -144,25 +136,26 @@ class make_record():
             last_i = self.c.lastrowid
             self.conn.commit()
 
-            add_to_history("wean_id", last_i, self.c, mate_id = ids[0])
+            ss.add_to_history("wean_id", last_i, mate_id = ids[0])
 
-            #insert new mice into individual
-            num_i = num_m + num_f
-            sex_str = ['M'] * num_m
-            sex_str.extend(['F'] * num_f)
+            if success == 1:
+                num_i = num_m + num_f
+                sex_str = ['M'] * num_m
+                sex_str.extend(['F'] * num_f)
 
-            params = (self.p[3], self.p[4], bd, ids[1], ids[2], self.p[5])
-            #add_new_records(num_i, sex_str, params, self.c)
-            last_i = ss.add_new_records(num_i, sex_str, params)
+                params = (self.p[3], self.p[4], bd, ids[1], ids[2], self.p[5])
 
-            #self.conn.commit()
-            print("commit a birth event")
+                last_i = ss.add_new_records(num_i, sex_str, params)
+
+                print("commit a birth event")
+            else:
+                last_i = 0
             return last_i
 
         elif self.which == 'retire':
             #空欄 error
             if self.p[0] == '' or self.p[1] == '':
-                show_warrn('Please put ID in both FROM and TO fields!')
+                ss.show_warn('Please put ID in both FROM and TO fields!')
                 return 0
             
             #0:id from, 1: id to, 2: retire date
@@ -184,114 +177,3 @@ class make_record():
                 else:
                     print('id:"{}" has already been set as "R".'.format(i))
             return int(self.p[1])
-
-########## sub functions##########
-def add_new_records(n, sex, p, c):
-    #n:num_pups, p:parameters, c:cursor
-    for i in range(0, n):
-        sql = """
-        INSERT INTO individual (sex, line, genotype, birth_date, father_id, mother_id, user) VALUES (?, ?, ?, ?, ?, ?, ?)
-        """
-        c.execute(sql, (sex[i], p[0], p[1], p[2], p[3], p[4], p[5]))
-
-def add_to_history(which, i, c, mate_id = []):
-    if which == 'mate_id':
-        sql = """
-        INSERT INTO history(mate_id) values("{}")
-        """.format(i)
-        c.execute(sql)
-    else:
-        sql = """
-        UPDATE history SET "{}" = "{}" WHERE mate_id = "{}"
-        """.format(which, i, mate_id)
-        c.execute(sql)
-
-def find_mate_ids(which, i, c):
-    if which == 'pregnancy':
-        name = 'mate_id'
-    elif which == 'birth':
-        name = 'preg_id'
-    elif which == 'wean':
-        name = 'birth_id'
-
-    sql = """
-    SELECT mate_id, male_id, female_id FROM mate WHERE mate_id = (
-        SELECT mate_id FROM history WHERE {} = "{}")
-    """.format(name, i)
-    c.execute(sql)
-    ans = c.fetchall()[0]
-    return ans
-
-def get_sex(i, c):
-    sql = """
-    SELECT sex FROM individual WHERE mouse_id = "{}"
-    """.format(i)
-    c.execute(sql)
-    return c.fetchall()[0][0]
-
-def check_sex(list_id, c):
-    sex = ['M', 'F']
-    for i in (0,1):
-        if get_sex(list_id[i], c) != sex[i]:
-            show_warrn("""sex of mouse_id:"{}" is not appropriate!""".format(list_id[i]))
-            return 0
-    return 1
-
-def check_id(list_id, c):
-    for i in (0, 1):
-        sql = """
-        SELECT mouse_id FROM individual WHERE mouse_id IN ("{}")
-        """.format(list_id[i])
-        c.execute(sql)
-        ans = c.fetchall()
-        if len(ans) == 0:
-            show_warrn("""mouse_id:"{}" is not in the DB!""".format(list_id[i]))
-            return 0
-    return 1
-
-def get_female_status(female_id, c):
-    sql = """
-    SELECT status FROM individual WHERE mouse_id = "{}"
-    """.format(female_id)
-    c.execute(sql)
-    ans = c.fetchall()[0][0]
-    return(ans)
-
-def get_birthday(mate_id, c):
-    sql = """
-    SELECT birth_date FROM birth WHERE birth_id =
-    (SELECT birth_id FROM history WHERE mate_id = "{}")
-    """.format(mate_id)
-    c.execute(sql)
-    ans = c.fetchall()[0][0]
-    return(ans)
-
-def find_state(i, c):
-    sql = """
-    SELECT status FROM individual WHERE mouse_id = "{}"
-    """.format(i)
-    c.execute(sql)
-    ans = c.fetchall()[0][0]
-    return ans
-
-def change_state(i, state, c):
-    if state == "None":
-        pass
-    else:
-        sql ="""
-            UPDATE individual
-            SET status = "{}"
-            WHERE mouse_id = "{}"
-        """.format(state, i)
-        c.execute(sql)
-
-def make_success(name_table, val, name_id, i, c):
-    sql = """ 
-    UPDATE "{}" SET success = "{}" WHERE "{}" = "{}"
-    """.format(name_table, val, name_id, i)
-    c.execute(sql)
-
-def show_warrn(text):
-    res = mbox.showwarning("title", text)
-    print("showwarning", res)
-    return 0

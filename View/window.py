@@ -238,7 +238,7 @@ class myCombobox(ttk.Combobox):
             width=8)
         self.configure(**kw)
 
-#### DataBase ####
+#### Window に DB テーブルの表示 ####
 class ShowDB():
     def __init__(self, master, n, which):
         self.master=master
@@ -374,4 +374,3 @@ def do_test(tree, a, which):
     r = test.make_record(which, a)
     b = r.register()
     ss.select_new(tree, b, which)
-    
