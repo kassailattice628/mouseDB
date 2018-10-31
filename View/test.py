@@ -95,10 +95,6 @@ class make_record():
         ####################
         elif self.which == 'birth':
             #p: 0:id_preg, 1:#male_pups, 2:#female_pups, 3:birth_date
-
-            #ids[0]:mate_id
-            #ids[1]:male_id
-            #ids[2]:female_id
             ids = find_mate_ids(self.which, self.p[0], self.c)
             change_state(ids[2], 'W', self.c)
             make_success("pregnancy", 1, "preg_id", self.p[0], self.c)
