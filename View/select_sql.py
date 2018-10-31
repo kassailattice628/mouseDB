@@ -8,7 +8,7 @@ from tkinter import messagebox
 conn = sqlite3.connect("mouseDB.sqlite3")
 c = conn.cursor()
 
-#選択した条件でマウスを検索して表示
+#選択した条件でマウスを検索して表示 <= mouseDB_App から
 def select_sql(tree, w):
     tree.delete(*tree.get_children())
     id1= w[1].get()
@@ -189,7 +189,6 @@ def make_new_birth(w):
     return last_i
 ### END OF make_new_birth ###
 
-
 ##########
 def make_new_wean(w):
     #read params from sub window
@@ -249,9 +248,6 @@ def make_new_wean(w):
     return last_i
 
 ##########
-
-
-
 def make_retire(w):
     #id 範囲指定
     id1= w[1].get()
@@ -288,22 +284,16 @@ def make_retire(w):
 def get_unsuccess_id(which):
     if which == 'pregnancy':
         name_id = 'mate_id'
-        name_table = 'mate'
-        cond = 'null'
+        sql = 'SELECT mate_id FROM mate WHERE success IS null'
 
     elif which == 'birth':
         name_id = 'preg_id'
-        name_table = 'pregnancy'
-        cond = 'null'
+        sql = 'SELECT preg_id FROM pregnancy WHERE success IS null'
 
     elif which == 'wean':
         name_id = 'birth_id'
-        name_table = 'birth'
-        cond = '1'
+        sql = 'SELECT h.birth_id FROM history h JOIN birth b ON h.birth_id = b.birth_id WHERE b.success IS 1 AND h.wean_id IS null ORDER BY h.birth_id'
 
-    sql = """
-    SELECT {} FROM {} WHERE success IS {}
-    """.format(name_id, name_table, cond)
     df = pd.read_sql_query(sql, conn)
 
     r = df[name_id].unique()
@@ -333,7 +323,6 @@ def select_new(tree, ind, which):
         SELECT mouse_id, sex, status, line, user
         FROM individual
         WHERE mouse_id >= {}
-        ORDER BY mouse_id
         """.format( i )
         
     elif which == 'mate':
@@ -341,32 +330,35 @@ def select_new(tree, ind, which):
         SELECT mate_id, female_id, male_id, start_date, end_date, success
         FROM mate
         WHERE mate_id <= {}
+        ORDER BY mate_id DESC
         """.format(ind+9)
 
     elif which == 'pregnancy':
         sql = """
-        SELECT h.preg_id, h.mate_id, p.success
-        FROM history h JOIN pregnancy p ON h.preg_id = p.preg_id
+        SELECT h.preg_id, h.mate_id, m.male_id, m.female_id
+        FROM history h JOIN mate m ON h.mate_id = m.mate_id JOIN pregnancy p ON h.preg_id = p.preg_id
         WHERE h.mate_id <= {}
+        ORDER BY p.preg_id DESC
         """.format(ind+9)
 
     elif which == 'birth':
         sql = """
-        SELECT h.birth_id, h.preg_id, b.num_pup_male, b.num_pup_female, b.birth_date, b.success
-        FROM history h JOIN birth b ON h.birth_id = b.birth_id
+        SELECT h.birth_id, h.preg_id, m.female_id, b.num_pup_male, b.num_pup_female, b.birth_date
+        FROM history h JOIN birth b ON h.birth_id = b.birth_id JOIN mate m ON h.mate_id = m.mate_id
         WHERE b.birth_id <= {}
         ORDER BY b.birth_id DESC
         """.format(ind+9)
 
     elif which == 'wean':
         sql = """
-        SELECT h.wean_id, birth_id, num_pup_male, num_pup_female
-        FROM wean
-        WHERE wean_id <= {}
-        ORDER BY wean_id DESC
+        SELECT h.wean_id, h.birth_id, m.female_id, w.num_pup_male, w.num_pup_female
+        FROM history h JOIN wean w ON h.wean_id = w.wean_id JOIN mate m ON h.mate_id = m.mate_id
+        WHERE w.wean_id <= {}
+        ORDER BY w.wean_id DESC
         """.format(ind+9)
 
     elif which == 'retire':
+        #check id
         if ind != 0:
             sql = """
             SELECT mouse_id, sex, status, retire_date
@@ -375,101 +367,45 @@ def select_new(tree, ind, which):
             ORDER BY mouse_id DESC
             """.format(ind+9)
         else:
+            sql = 0
             print(" no mice are selected!")
-        #表示    
-        Update_View(tree, sql)
-        
-def select_new_sql(tree, w, ind):
-    i = ind[0] - ind[1] + 1
-    sql = """
-    SELECT mouse_id, sex, status, line, user
-    FROM individual
-    WHERE mouse_id >= {}
-    ORDER BY mouse_id
-    """.format( i )
-
-    Update_View(tree, sql)
-### END of "select_new_sql"
-
-def select_new_mate_sql(tree, w, ind):
-    sql = """
-    SELECT mate_id, female_id, male_id, start_date, end_date, success
-    FROM mate
-    WHERE mate_id <= {}
-    """.format(ind+9)
-
-    Update_View(tree, sql)
-### END of  select_new_sql ###
-
-def select_new_preg_sql(tree, w, ind):
-    sql = """
-    SELECT h.preg_id, h.mate_id, p.success
-    FROM history h JOIN pregnancy p ON h.preg_id = p.preg_id
-    WHERE h.mate_id <= {}
-    """.format(ind+9)
-    
-    Update_View(tree, sql)
-### END of "select_new_sql"
-
-def select_new_birth_sql(tree, w, ind):
-    sql = """
-    SELECT birth_id, preg_id, num_pup_male, num_pup_female, birth_date, success
-    FROM birth
-    WHERE birth_id <= {}
-    ORDER BY birth_id DESC
-    """.format(ind+9)
-    Update_View(tree, sql)
-
-def select_new_wean_sql(tree, w, ind):
-    #表示
-    sql = """
-    SELECT wean_id, birth_id, num_pup_male, num_pup_female
-    FROM wean
-    WHERE wean_id <= {}
-    ORDER BY wean_id DESC
-    """.format(ind+9)
-    Update_View(tree, sql)
-
-def select_retire_sql(tree, w, ind):
-    if ind != 0:
-        sql = """
-            SELECT mouse_id, sex, status, retire_date
-            FROM individual
-            WHERE mouse_id <= "{}" AND status = 'R'
-            ORDER BY mouse_id DESC
-        """.format(ind+9)
+    #表示 
+    if sql != 0:
         Update_View(tree, sql)
 
-
-
-
-
+#show_new と同じようの slq 直の方がいいか
 ########## 最新 10 のデータを表示 ##########
 def latest10(tree, which):
     if which == "pregnancy":
+        sql = """
+        SELECT mate_id, female_id, male_id, start_date, end_date, success
+        FROM mate
+        WHERE success IS NULL AND mate_id >= (
+            SELECT MAX(mate_id) from mate) -9
+        """
         # mate table を表示したい
-        columns = "mate_id, female_id, male_id, start_date, end_date, success"
-        table = "mate"
-        conditions = "success IS NULL AND mate_id >= (select MAX(mate_id) from mate) - 9"
+        #columns = "mate_id, female_id, male_id, start_date, end_date, success"
+        #table = "mate"
+        #conditions = "success IS NULL AND mate_id >= (select MAX(mate_id) from mate) - 9"
 
     elif which == "birth":
+        sql = """
+        SELECT h.preg_id, h.mate_id, m.male_id, m.female_id
+        FROM history h JOIN mate m ON h.mate_id = m.mate_id JOIN pregnancy p ON h.preg_id = p.preg_id
+        WHERE p.success IS NULL AND p.preg_id >= (select MAX(preg_id) FROM pregnancy) - 9
+        """
         # pregnancy table を表示したい
-        columns = "h.preg_id, h.mate_id, m.male_id, m.female_id"
-        table = "history h JOIN mate m ON h.mate_id = m.mate_id JOIN pregnancy p ON h.preg_id = p.preg_id"
-        conditions = "p.success IS NULL AND p.preg_id >= (select MAX(preg_id) FROM pregnancy) - 9"
+        #columns = "h.preg_id, h.mate_id, m.male_id, m.female_id"
+        #table = "history h JOIN mate m ON h.mate_id = m.mate_id JOIN pregnancy p ON h.preg_id = p.preg_id"
+        #conditions = "p.success IS NULL AND p.preg_id >= (select MAX(preg_id) FROM pregnancy) - 9"
 
     elif which == "wean":
-        # birth table を表示したい
-        columns = "h.birth_id, h.preg_id, m.female_id, b.num_pup_male, b.num_pup_female, b.birth_date"
-        table = "history h JOIN birth b ON h.birth_id = b.birth_id JOIN mate m ON h.mate_id = m.mate_id"
-        conditions = "b.success IS 1 AND b.birth_id >= (select MAX(birth_id) FROM birth) - 9"
-    
-    sql = """
-        SELECT {}
-        FROM {}
-        WHERE {}
-        """.format(columns,table, conditions)
-    
+        sql = """
+        SELECT h.birth_id, h.preg_id, m.female_id, b.num_pup_male, b.num_pup_female, b.birth_date
+        FROM history h JOIN birth b ON h.birth_id = b.birth_id JOIN mate m ON h.mate_id = m.mate_id
+        WHERE b.success IS 1 AND h.wean_id IS null
+        ORDER BY h.birth_id
+        """
     Update_View(tree, sql)
 
 ## show extraxted table ##
@@ -514,7 +450,6 @@ def find_state(i):
     return  s[0][0]
 
 def find_id(i1, i2):
-
     ii = 0
     for i in (i1, i2):
         if ii == 0:

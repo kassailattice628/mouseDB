@@ -79,7 +79,7 @@ class Frame(tk.LabelFrame):
         today_str=today.strftime('%y%m%d')
         b3.insert(tk.END, today_str)
 
-        b4 = self.labeled_List("Gene: ", lists.line[1:], row2, 0, 0)
+        b4 = self.labeled_List("Gene: ", lists.line[1:], row2, 0, 0, 11)
         b5 = self.labeled_List("Genotype: ", lists.genotype, row2, 2, 0)
         b6 = self.labeled_List("User: ", lists.users[1:], row2, 4, 0)
 
@@ -142,13 +142,13 @@ class Frame(tk.LabelFrame):
         row1 = 1
         row2= 2
         val = ss.get_unsuccess_id('wean')
-        b1 = self.labeled_List("Wean ID: ", val, row, 0, 0)
+        b1 = self.labeled_List("Birth ID: ", val, row, 0, 0)
         b2 = self.labeled_Entry("Num Male Pups:", row1, 0, 15, 8)
         b2.insert(tk.END, "0")
         b3 = self.labeled_Entry("Num Female Pups:", row1, 2, 15, 8)
         b3.insert(tk.END, "0")
-        b4 = self.labeled_List("Gene: ", lists.line[1:], row1, 4, 1)
-        b5 = self.labeled_List("genotype: ", lists.genotype[0:], row2, 4, 0)
+        b4 = self.labeled_List("Gene: ", lists.line[1:], row1, 4, 0, 11)
+        b5 = self.labeled_List("genotype: ", lists.genotype[0:], row2, 0, 0)
         b6 = self.labeled_List("Users: ", lists.users[1:], row2, 2, 0)
 
         a = myButton(self, text = "Register", width=12)
@@ -161,7 +161,7 @@ class Frame(tk.LabelFrame):
         row = 0
         b1 = self.labeled_Entry("ID from: ", row, 0, 12)
         b2= self.labeled_Entry("to: ", row, 2)
-        b3 = self.labeled_Entry("END date: ", row, 4, 12)
+        b3 = self.labeled_Entry("Retire date: ", row, 4, 12)
         today = datetime.datetime.today()
         today_str=today.strftime('%y%m%d')
         b3.insert(tk.END, today_str)
@@ -189,10 +189,14 @@ class Frame(tk.LabelFrame):
         a.grid(row=row, column=col+1)
         return a
 
-    def labeled_List(self, text, val, row, col, n):
+    def labeled_List(self, text, val, row, col, n, *args):
         a = myLabel(self, text=text)
         a.grid(row=row, column=col)
-        a = myCombobox(self)
+        if len(args) == 1:
+            a = myCombobox(self, width=args[0])
+        else:
+            a = myCombobox(self)
+
         a["values"] = val
         a.current(n)
         a.grid(row=row, column=col+1)
@@ -308,7 +312,6 @@ def new_buy_window():
     sub = OpenWindow("New Buy", "700x300").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_buy()
-    #a[0]["command"] = lambda:register(sub_tree.tree, a)
     a[0]["command"] = lambda:do_test(sub_tree.tree, a, "buy")
     sub_tree = ShowDB(sub, 20, "buy")
 
@@ -319,7 +322,6 @@ def new_mate_window():
     sub = OpenWindow("New Mate", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_mate()
-    #a[0]["command"] = lambda:register_mate(sub_tree.tree, a)
     a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'mate')
     sub_tree = ShowDB(sub, 20, "mate")
 
@@ -329,7 +331,6 @@ def new_pregnancy_window():
     sub = OpenWindow("New Pregnancy", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_pregnancy()
-    #a[0]["command"] = lambda:register_pregnancy(sub_tree.tree, a)
     a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'pregnancy')
     sub_tree = ShowDB(sub, 20, "pregnancy")
     
@@ -342,7 +343,6 @@ def new_birth_window():
     sub = OpenWindow("New Birth Event", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_birth()
-    #a[0]["command"] = lambda:register_birth(sub_tree.tree, a)
     a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'birth')
     sub_tree = ShowDB(sub, 20, "birth")
 
@@ -354,7 +354,6 @@ def new_wean_window():
     sub = OpenWindow("New Wean Event", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_wean()
-    #a[0]["command"] = lambda:register_wean(sub_tree.tree, a)
     a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'wean')
     sub_tree = ShowDB(sub, 20, "wean")
     sub_tree2 = ShowDB(sub, 20, "birth")
@@ -365,62 +364,14 @@ def retire_window():
     sub = OpenWindow("Retire", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.retire()
-    a[0]["command"] = lambda:register_retire(sub_tree.tree, a)
+    a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'retire')
     sub_tree = ShowDB(sub, 20, "retire")
-    #a[-1]["command"] = lambda:UnDo.UnDo("retire", a)
     a[-1]["command"] = lambda: print('Undo for "retire" has not been supported yet.')
-##### Register #####
-"""
-def register(tree, a):
-    b = ss.make_new_records(a)
-    ss.select_new_sql(tree, a, b)
 
-def register_mate(tree, a):
-    b = ss.make_new_mate(a)
-    ss.select_new_mate_sql(tree, a, b)
-    
-def register_pregnancy(tree, a):
-    b = ss.make_new_preg(a)
-    ss.select_new_preg_sql(tree, a, b)
-    
-def register_birth(tree, a):
-    b = ss.make_new_birth(a)
-    ss.select_new_birth_sql(tree, a, b)
-    
-def register_wean(tree, a):
-    b = ss.make_new_wean(a)
-    ss.select_new_wean_sql(tree, a, b)
-"""
-def register_retire(tree, a):
-    b = ss.make_retire(a)
-    if b != 0:
-        ss.select_retire_sql(tree, a, b)
+##### Register #####
 
 def do_test(tree, a, which):
     r = test.make_record(which, a)
     b = r.register()
-    print(b)
-    frag = 1
-    if frag == 0:
-        if which == "buy":
-            ss.select_new_sql(tree, a, b)
-        elif which == "mate":
-            ss.select_new_mate_sql(tree, a, b)
-        elif which == "pregnancy":
-            ss.select_new_preg_sql(tree, a, b)
-        elif which == "birth":
-            ss.select_new_birth_sql(tree, a, b)
-        elif which == "wean":
-            ss.select_new_wean_sql(tree, a, b)
-    elif frag == 1:
-        if which == "buy":
-            ss.select_new_sql(tree, a, b)
-        elif which == "mate":
-            ss.select_new_mate_sql(tree, a, b)
-        elif which == "pregnancy":
-            ss.select_new_preg_sql(tree, a, b)
-        elif which == "birth":
-            ss.select_new_birth_sql(tree, a, b)
-        elif which == "wean":
-            ss.select_new_wean_sql(tree, a, b)
+    ss.select_new(tree, b, which)
 
