@@ -204,9 +204,6 @@ def Update_View(tree, sql):
 ########## UPDATE DB ##########
 def add_new_records(n, sex, p):
     #n:num_pups, p:parameters, c:cursor
-    print(n)
-    print(sex)
-    print(p)
     for i in range(0, n):
         sql = """
         INSERT INTO individual (sex, line, genotype, birth_date, father_id, mother_id, user) VALUES (?, ?, ?, ?, ?, ?, ?)
