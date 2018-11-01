@@ -213,8 +213,123 @@ def add_new_records(n, sex, p):
         """
         c.execute(sql, (sex[i], p[0], p[1], p[2], p[3], p[4], p[5]))
     last_i = c.lastrowid
-    conn.commit()
+     #conn.commit()
     return last_i
+
+def add_new_mate(p):
+    v1 = check_id(p[0:2])
+    v2 = check_sex(p[0:2])
+    if v1 == 0 or v2 == 0:
+        return 0
+    f_state = get_status(p[1])
+
+    if f_state == 'B':
+        #mate 登録
+        sql = """
+        INSERT INTO mate (male_id, female_id, start_date) values(?, ?, ?)
+        """
+        c.execute(sql, p)
+        last_i = c.lastrowid
+        #female state 変更
+        change_state(p[1], 'M')
+        add_to_history("mate_id", last_i)
+
+        print("add a mate event")
+        return last_i
+    else:
+        show_warn("status of id:'{}' is not 'B'".format(p[1]))
+        return 0
+
+def add_new_pregnancy(which, p):
+    ids = find_mate_ids(which, p[0])
+    change_state(ids[2], 'P')
+    make_success("mate", 1, "mate_id", p[0])
+
+    sql = """
+    INSERT INTO pregnancy DEFAULT VALUES
+    """
+    c.execute(sql)
+    last_i = c.lastrowid
+    
+    add_to_history("preg_id", last_i, mate_id = p[0])
+    print("add a pregnancy event")
+    return last_i
+
+def add_new_birth(which, p):
+    ids = find_mate_ids(which, p[0])
+    change_state(ids[2], 'W')
+    make_success("pregnancy", 1, "preg_id", p[0])
+
+    if int(p[1]) == 0 and int(p[2]) == 0:
+        success = 0
+    else:
+        success = 1
+
+    sql = """
+    INSERT INTO birth (num_pup_male, num_pup_female, birth_date, success) VALUES (?, ?, ?, ?)
+    """
+    val = (p[1], p[2], p[3], success)
+    c.execute(sql, val)
+    last_i = c.lastrowid
+
+    add_to_history('birth_id', last_i, mate_id = ids[0])
+
+    print("add a birth event")
+    return last_i
+
+def add_new_wean(which, p):
+    num_m = int(p[1])
+    num_f = int(p[2])
+    ids = find_mate_ids(which, p[0])
+    bd = get_birthday(ids[0])
+    change_state(ids[2], 'B')
+
+    if num_m == 0 and num_f == 0:
+        success = 0
+        print ("no mice wean")
+    else:
+        success = 1
+    
+    sql = """
+    INSERT INTO wean (num_pup_male, num_pup_female, success) VALUES (?, ?, ?)
+    """
+    val = (p[1], p[2], success)
+    c.execute(sql, val)
+    last_i = c.lastrowid
+
+    add_to_history('wean_id', last_i, mate_id = ids[0])
+
+    #individual に登録
+    if success == 1:
+        num_i = num_m + num_f
+        sex_str = ['M'] * num_m
+        sex_str.extend(['F'] * num_f)
+        params = (p[3], p[4], bd, ids[1], ids[2], p[5])
+        last_i = add_new_records(num_i, sex_str, params)
+        print('add a birth event')
+    else:
+        last_i = 0
+    return last_i
+
+def retire(p):
+    if p[0] == '' or p[1] == '':
+        show_warn('Please put ID in both FROM and TO fields!')
+        return 0
+    v1 = check_id(p[0:2])
+    if v1 == 0:
+        return 0
+    ids = range(int(p[0]), int(p[1]) +1)
+    for i in ids:
+        s = get_status(i)
+        if s != 'R':
+            sql = """ 
+            UPDATE individual SET retire_date = {} WHERE mouse_id = {}
+            """.format(p[2], str(i))
+            c.execute(sql)
+            change_state(i, 'R')
+        else:
+            print('id:"{}" has already been set as "R".'.format(i))
+    return int(p[1])
 
 def add_to_history(which, i, mate_id = []):
     if which == 'mate_id':
@@ -227,7 +342,7 @@ def add_to_history(which, i, mate_id = []):
         """.format(which, i, mate_id)
 
     c.execute(sql)
-    conn.commit()
+     #conn.commit()
 
 def change_state(i, state):
     if state == "None":
@@ -239,14 +354,14 @@ def change_state(i, state):
             WHERE mouse_id = "{}"
         """.format(state, i)
         c.execute(sql)
-        conn.commit()
+         #conn.commit()
 
 def make_success(name_table, val, name_id, i):
     sql = """ 
     UPDATE "{}" SET success = "{}" WHERE "{}" = "{}"
     """.format(name_table, val, name_id, i)
     c.execute(sql)
-    conn.commit()
+     #conn.commit()
 
 
 ########## serach ##########
@@ -319,8 +434,19 @@ def get_sex(i):
     c.execute(sql)
     return c.fetchall()[0][0]
 
-
+##########
 def show_warn(text):
     res = mbox.showwarning("title", text)
     print("showwarning", res)
     return 0
+
+##########
+def save():
+    print("save changes")
+    conn.commit()
+
+def undo():
+    print("RollBack changes")
+    conn.rollback()
+    conn.commit()
+    #Update_View

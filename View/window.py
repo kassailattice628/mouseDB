@@ -5,8 +5,7 @@ import tkinter.ttk as ttk
 import datetime
 
 from View import select_sql as ss
-from View import test
-from Utils import UnDo
+from View import register
 
 class select_list():
     def __init__(self):
@@ -33,6 +32,8 @@ class OpenWindow():
         sub = tk.Toplevel()
         sub.title(self.title)
         sub.geometry(self.size)
+        fc = close_sub(sub)
+        sub.protocol("WM_DELETE_WINDOW", fc.close_fcn)
         return sub
 
 class Frame(tk.LabelFrame):
@@ -312,65 +313,75 @@ def new_buy_window():
     sub = OpenWindow("New Buy", "700x300").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_buy()
-    a[0]["command"] = lambda:do_test(sub_tree.tree, a, "buy")
+    a[0]["command"] = lambda:make_register(sub_tree.tree, a, "buy")
     sub_tree = ShowDB(sub, 20, "buy")
 
-    a[-1]["command"] = lambda:UnDo.UnDo("buy", a)
+    #a[-1]["command"] = lambda:UnDo.UnDo("buy", a)
+    a[-1]["command"] = lambda:ss.undo()
     return sub_tree
 
 def new_mate_window():
     sub = OpenWindow("New Mate", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_mate()
-    a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'mate')
+    a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'mate')
     sub_tree = ShowDB(sub, 20, "mate")
 
-    a[-1]["command"] = lambda:UnDo.UnDo("mate", a)
+    a[-1]["command"] = lambda:ss.undo()
 
 def new_pregnancy_window():
     sub = OpenWindow("New Pregnancy", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_pregnancy()
-    a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'pregnancy')
+    a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'pregnancy')
     sub_tree = ShowDB(sub, 20, "pregnancy")
     
     sub_tree2 = ShowDB(sub, 20, "mate")
     ss.latest10(sub_tree2.tree, "pregnancy")
 
-    a[-1]["command"] = lambda:UnDo.UnDo("pregnancy", a)
+    a[-1]["command"] = lambda:ss.undo()
 
 def new_birth_window():
     sub = OpenWindow("New Birth Event", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_birth()
-    a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'birth')
+    a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'birth')
     sub_tree = ShowDB(sub, 20, "birth")
 
     sub_tree2 = ShowDB(sub, 20, "pregnancy")
     ss.latest10(sub_tree2.tree, "birth")
-    a[-1]["command"] = lambda:UnDo.UnDo("birth", a)
+    a[-1]["command"] = lambda:ss.undo()
 
 def new_wean_window():
     sub = OpenWindow("New Wean Event", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.new_wean()
-    a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'wean')
+    a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'wean')
     sub_tree = ShowDB(sub, 20, "wean")
     sub_tree2 = ShowDB(sub, 20, "birth")
     ss.latest10(sub_tree2.tree, "wean")
-    a[-1]["command"] = lambda:UnDo.UnDo("wean", a)
+    a[-1]["command"] = lambda:ss.undo()
 
 def retire_window():
     sub = OpenWindow("Retire", "700x500").sub()
     f = Frame(sub, text="Select Menu")
     a = f.retire()
-    a[0]["command"] = lambda:do_test(sub_tree.tree, a, 'retire')
+    a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'retire')
     sub_tree = ShowDB(sub, 20, "retire")
-    a[-1]["command"] = lambda: print('Undo for "retire" has not been supported yet.')
+    a[-1]["command"] = lambda:ss.undo()
 
 ##### Register #####
 
-def do_test(tree, a, which):
-    r = test.make_record(which, a)
+def make_register(tree, a, which):
+    r = register.make_record(which, a)
     b = r.register()
     ss.select_new(tree, b, which)
+
+##### Window Close Object #####
+class close_sub():
+    def __init__(self, sub):
+        self.sub = sub
+    def close_fcn(self):
+        ss.save()
+        self.sub.destroy()
+
