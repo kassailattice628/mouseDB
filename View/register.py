@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+# -*-coding: utf-8 -*-
 """ View/register.py"""
 ##########
 from View import select_sql as ss

@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+# -*-coding: utf-8 -*-
+
 """select_sql.py"""
 ##########
 import sqlite3
@@ -175,6 +178,7 @@ def latest10(tree, which):
         sql = """
         SELECT h.preg_id, h.mate_id, m.male_id, m.female_id
         FROM history h JOIN mate m ON h.mate_id = m.mate_id JOIN pregnancy p ON h.preg_id = p.preg_id
+         
         WHERE p.success IS NULL AND p.preg_id >= (select MAX(preg_id) FROM pregnancy) - 9
         """
 
@@ -210,7 +214,6 @@ def add_new_records(n, sex, p):
         """
         c.execute(sql, (sex[i], p[0], p[1], p[2], p[3], p[4], p[5]))
     last_i = c.lastrowid
-     #conn.commit()
     return last_i
 
 def add_new_mate(p):
@@ -254,12 +257,15 @@ def add_new_pregnancy(which, p):
 
 def add_new_birth(which, p):
     ids = find_mate_ids(which, p[0])
-    change_state(ids[2], 'W')
+
     make_success("pregnancy", 1, "preg_id", p[0])
 
     if int(p[1]) == 0 and int(p[2]) == 0:
+        #出産後すぐ全滅の場合も 0, 0 にして B に戻す
+        change_state(ids[2], 'B')
         success = 0
     else:
+        change_state(ids[2], 'W')
         success = 1
 
     sql = """
@@ -279,6 +285,7 @@ def add_new_wean(which, p):
     num_f = int(p[2])
     ids = find_mate_ids(which, p[0])
     bd = get_birthday(ids[0])
+    #成功しても失敗しても B に戻す
     change_state(ids[2], 'B')
 
     if num_m == 0 and num_f == 0:
@@ -339,7 +346,6 @@ def add_to_history(which, i, mate_id = []):
         """.format(which, i, mate_id)
 
     c.execute(sql)
-     #conn.commit()
 
 def change_state(i, state):
     if state == "None":
@@ -351,15 +357,12 @@ def change_state(i, state):
             WHERE mouse_id = "{}"
         """.format(state, i)
         c.execute(sql)
-         #conn.commit()
 
 def make_success(name_table, val, name_id, i):
     sql = """ 
     UPDATE "{}" SET success = "{}" WHERE "{}" = "{}"
     """.format(name_table, val, name_id, i)
     c.execute(sql)
-     #conn.commit()
-
 
 ########## serach ##########
 def find_mate_ids(which, i):
@@ -430,6 +433,27 @@ def get_sex(i):
     """.format(i)
     c.execute(sql)
     return c.fetchall()[0][0]
+
+def get_summary():
+    c1 = summary_sql("status = 'B' AND sex = 'M'")
+    c2 = summary_sql("status = 'B' AND sex = 'F'")
+    c3 = summary_sql("status = 'M'")
+    c4 = summary_sql("status = 'P'")
+    c5 = summary_sql("status = 'W'")
+    c_all = summary_sql("status IS NOT 'R'")
+    
+    return [c1, c2, c3, c4, c5, c_all] 
+
+def summary_sql(condition):
+    sql = """
+    SELECT Count(mouse_id)
+    FROM individual
+    WHERE {}
+    """.format(condition)
+    c.execute(sql)
+    ans = c.fetchall()[0][0]
+    return ans
+
 
 ##########
 def show_warn(text):

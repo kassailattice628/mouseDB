@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+# -*-coding: utf-8 -*-
 """ View/window.py"""
 ##########
 import tkinter as tk
@@ -44,8 +46,10 @@ class Frame(tk.LabelFrame):
             relief="ridge",
             text=""
         )
+        self.master = master
         self.configure(**kw)
         self.pack(fill="x")
+        
 
     def create_event(self):
         callbacks = [new_buy_window, new_mate_window, new_pregnancy_window, new_birth_window, new_wean_window, retire_window]
@@ -203,6 +207,31 @@ class Frame(tk.LabelFrame):
         a.grid(row=row, column=col+1)
         return a
 
+    def show_summary(self):
+        s = ss.get_summary()
+        t1 = """ {} (M) and {} (F) mice are 'B'. """.format(s[0], s[1])
+        t2 = """ {} mice (F) are 'M'. """.format(s[2])
+        t3 = """ {} mice (F) are 'P'. """.format(s[3])
+        t4 = """ {} mice (F) are 'W'. """.format(s[4])
+        t5 = """ Total {} mice are breeding now. """.format(s[5])
+        txt1 = myLabel(self, text=t1)
+        txt2 = myLabel(self, text=t2)
+        txt3 = myLabel(self, text=t3)
+        txt4 = myLabel(self, text=t4)
+        txt5 = myLabel(self, text=t5)
+        
+        txt1.pack(fill="x")
+        txt2.pack(fill="x")
+        txt3.pack(fill="x")
+        txt4.pack(fill="x")
+        txt5.pack(fill="x")
+        
+        return 1
+
+    def show_db(self):
+        tree = ShowDB(self, 20, 'buy')
+        return tree
+
 ### Buttons ###
 class myButton(tk.Button):
     """ Event Menu 用のボタン"""
@@ -316,7 +345,6 @@ def new_buy_window():
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, "buy")
     sub_tree = ShowDB(sub, 20, "buy")
 
-    #a[-1]["command"] = lambda:UnDo.UnDo("buy", a)
     a[-1]["command"] = lambda:ss.undo()
     return sub_tree
 

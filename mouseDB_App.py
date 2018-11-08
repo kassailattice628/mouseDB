@@ -12,17 +12,24 @@ class mouseDB_App():
 
     def run(self):
         #main Window
-        root = window.OpenWindow("MOUSE DB_KASAI", "800x500").main()
+        root = window.OpenWindow("MOUSE DB_KASAI", "800x550").main()
 
-        #Frame1
+        #Frame0
         f0 = window.Frame(root, text="Event Menu")
         f0.create_event()
-        #Frame2
+        #Frame1
         f1 = window.Frame(root, text="Search Menu")
         a = f1.create_search()
         a[0]["command"]=lambda:select_sql.select_sql(tree.tree, a)
         #DB View
-        tree = window.ShowDB(root, 20, "buy")
+        f2 = window.Frame(root, text="Table")
+        tree = f2.show_db() 
+        #tree = window.ShowDB(root, 20, "buy")
+
+        # Frame3
+        f3 = window.Frame(root, text="Summary")
+        f3.show_summary()
+
         # start app
         root.mainloop()
 
