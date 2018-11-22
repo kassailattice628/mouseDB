@@ -17,14 +17,16 @@ class mouseDB_App():
         #Frame0
         f0 = window.Frame(root, text="Event Menu")
         f0.create_event()
+
         #Frame1
         f1 = window.Frame(root, text="Search Menu")
         a = f1.create_search()
-        a[0]["command"]=lambda:select_sql.select_sql(tree.tree, a)
+        a[0]["command"]=lambda:select_sql.show_selet(tree.tree, a)
+        a[9]["command"]=lambda:select_sql.to_csv_select(tree.tree, a)
+
         #DB View
         f2 = window.Frame(root, text="Table")
         tree = f2.show_db() 
-        #tree = window.ShowDB(root, 20, "buy")
 
         # Frame3
         f3 = window.Frame(root, text="Summary")

@@ -3,6 +3,7 @@
 
 """select_sql.py"""
 ##########
+import datetime
 import sqlite3
 import pandas as pd
 from tkinter import messagebox as mbox
@@ -13,8 +14,27 @@ c = conn.cursor()
 
 #選択した条件でマウスを検索して表示
 # <= mouseDB_App から
-def select_sql(tree, w):
+def show_selet(tree, w):
+    sql = select_sql(w, 'show')
     tree.delete(*tree.get_children())
+    Update_View(tree, sql)
+
+def to_csv_select(tree, w):
+    sql = select_sql(w, 'csv')
+    
+    #sqlite -> pandas df -> csv
+    df = pd.read_sql_query(sql, conn)
+    df = df.fillna(int(0))
+    df = df.replace('M', 1)
+    df = df.replace('F', 2)
+    df.columns = ['id', 'sex', 'mom', 'dad']
+    #df['mom'] = df['mom'].astype(int)
+    #df['dad'] = df['dad'].astype(int)
+    now = datetime.datetime.now()
+    fname = '~/Desktop/df_{0:%y%m%d}.csv'.format(now)
+    df.to_csv(fname)
+
+def select_sql(w, t):
     id1= w[1].get()
     id2= w[2].get()
     bd1= w[3].get()
@@ -65,14 +85,24 @@ def select_sql(tree, w):
     else:
         cond6 = 'user = "{}"'.format(user)
 
-    sql ="""
-    SELECT mouse_id, sex, status, birth_date, line, user
+    if t == 'show':
+        #show in window
+        sql1 ="""
+        SELECT mouse_id, sex, status, birth_date, line, user"""
+    
+    elif t == 'csv':
+        #csv (for kinship)
+        sql1 ="""
+        SELECT mouse_id, sex, mother_id, father_id"""
+    
+    sql = (sql1 + 
+    """
     FROM individual
     WHERE {0} AND {1} AND {2} AND {3} AND {4} AND {5}
     ORDER BY mouse_id
-    """.format(cond1, cond2, cond3, cond4, cond5, cond6)
+    """.format(cond1, cond2, cond3, cond4, cond5, cond6))
 
-    Update_View(tree, sql)
+    return sql
 ### END of "select_sql"
 
 # <= window.py から
@@ -126,6 +156,10 @@ def select_new(tree, ind, which):
         WHERE h.mate_id <= {}
         ORDER BY p.preg_id DESC
         """.format(ind+9)
+    
+    elif which == 'pregnancy2':
+        sql = 0
+        print("mate end!")
 
     elif which == 'birth':
         sql = """
@@ -242,17 +276,27 @@ def add_new_mate(p):
 
 def add_new_pregnancy(which, p):
     ids = find_mate_ids(which, p[0])
-    change_state(ids[2], 'P')
-    make_success("mate", 1, "mate_id", p[0])
-
-    sql = """
-    INSERT INTO pregnancy DEFAULT VALUES
-    """
-    c.execute(sql)
-    last_i = c.lastrowid
+    print(p[1])
     
-    add_to_history("preg_id", last_i, mate_id = p[0])
-    print("add a pregnancy event")
+    if p[1] == 'Success':
+        change_state(ids[2], 'P')
+        make_success("mate", 1, "mate_id", p[0])
+
+        sql = """
+        INSERT INTO pregnancy DEFAULT VALUES
+        """
+        c.execute(sql)
+        last_i = c.lastrowid
+    
+        add_to_history("preg_id", last_i,   mate_id = p[0])
+        print("add a pregnancy event")
+
+    elif p[1] == 'Fail':
+        #update mate event to "fail"
+        change_state(ids[2], 'B')
+        make_success("mate", 0, "mate_id", p[0])
+        last_i = 0
+
     return last_i
 
 def add_new_birth(which, p):

@@ -17,6 +17,7 @@ class select_list():
         self.line = ("Any", "C57BL/6N", "GAD67-GFP","VGAT-Venus","VGAT-tdTomato")
         self.genotype = ("wt", "+/-", "-/-", "unknown")
         self.users = ("Any", "KASAI")
+        self.results = ('Success', 'Fail')
 lists = select_list()
 
 class OpenWindow():
@@ -49,7 +50,6 @@ class Frame(tk.LabelFrame):
         self.master = master
         self.configure(**kw)
         self.pack(fill="x")
-        
 
     def create_event(self):
         callbacks = [new_buy_window, new_mate_window, new_pregnancy_window, new_birth_window, new_wean_window, retire_window]
@@ -58,8 +58,12 @@ class Frame(tk.LabelFrame):
             a.grid(row=0, column=i)
 
     def create_search(self):
-        a = myButton(self, text="Show DB")
-        a.grid(row=0)
+        a1 = myButton(self, text="Show DB")
+        a1.grid(row=0)
+
+        a2 = myButton(self, text="Save CSV")
+        a2.grid(row=0, column=1)
+
         row1 = 1
         row2 = 2
         b1 = self.labeled_Entry("ID from: ", row1, 0, 12)
@@ -70,7 +74,8 @@ class Frame(tk.LabelFrame):
         b6 = self.labeled_List("status", lists.state, row2, 2, 0)
         b7 = self.labeled_List("Gene", lists.line, row2, 4, 0)
         b8 = self.labeled_List("User", lists.users, row2, 6, 0)
-        return a, b1, b2, b3, b4, b5, b6, b7, b8
+
+        return a1, b1, b2, b3, b4, b5, b6, b7, b8, a2
 
     def new_buy(self):
         row=0
@@ -110,17 +115,21 @@ class Frame(tk.LabelFrame):
         a.grid(row=1, column=4)
         c = myButton(self, text="UnDo", width=12)
         c.grid(row=1, column=5)
+
         return a, b1, b2, b3, c
 
     def new_pregnancy(self):
         val = ss.get_unsuccess_id('pregnancy')
         b1 = self.labeled_List("Mate ID: ", val, 0, 0, 0)
 
+        b2 = self.labeled_List("Results: ", lists.results, 0, 2, 0)
+
         a = myButton(self, text="Register", width=12)
-        a.grid(row=0, column=3)
+        a.grid(row=0, column=4)
         c = myButton(self, text="UnDo", width=12)
-        c.grid(row=0, column=4)
-        return a, b1, c
+        c.grid(row=0, column=5)
+
+        return a, b1, b2, c
     
     def new_birth(self):
         row = 0
@@ -140,6 +149,7 @@ class Frame(tk.LabelFrame):
         a.grid(row=2, column=4)
         c = myButton(self, text="UnDo", width=12)
         c.grid(row=2, column=5)
+
         return a, b1, b2, b3, b4, c
 
     def new_wean(self):
@@ -160,6 +170,7 @@ class Frame(tk.LabelFrame):
         a.grid(row=row2, column=4)
         c = myButton(self, text="UnDo", width=12)
         c.grid(row=row2, column=5)
+
         return a, b1, b2, b3, b4, b5, b6, c
 
     def retire(self):
@@ -175,6 +186,7 @@ class Frame(tk.LabelFrame):
         a.grid(row=1, column=4)
         c = myButton(self, text="UnDo", width=12)
         c.grid(row=1, column=5)
+
         return a, b1, b2, b3, c
 
     def labeled_Entry(self, text, row, col, *args):
@@ -192,6 +204,7 @@ class Frame(tk.LabelFrame):
         a.grid(row=row, column=col)
         a = myEntry(self, width=width2)
         a.grid(row=row, column=col+1)
+
         return a
 
     def labeled_List(self, text, val, row, col, n, *args):
@@ -205,6 +218,7 @@ class Frame(tk.LabelFrame):
         a["values"] = val
         a.current(n)
         a.grid(row=row, column=col+1)
+        
         return a
 
     def show_summary(self):
@@ -401,7 +415,9 @@ def retire_window():
 ##### Register #####
 
 def make_register(tree, a, which):
+    # a = parames setting from subwindows
     r = register.make_record(which, a)
+    # b = (last_i)
     b = r.register()
     ss.select_new(tree, b, which)
 

@@ -41,6 +41,12 @@ class make_record():
             last_i = ss.add_new_pregnancy(self.which, self.p)
             return last_i
 
+        elif self.which == 'pregnancy2':
+            #make failure for selectd mate event
+            #p: 0:id_mate
+            last_i = ss.end_mate(self.which, self.p)
+            return last_i
+
         elif self.which == 'birth':
             #p: 0:id_preg, 1:#male_pups, #2:#female_pups, 3:birth_date
             last_i = ss.add_new_birth(self.which, self.p)
