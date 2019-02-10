@@ -486,7 +486,17 @@ def get_summary():
     c5 = summary_sql("status = 'W'")
     c_all = summary_sql("status IS NOT 'R'")
     
-    return [c1, c2, c3, c4, c5, c_all] 
+    y = datetime.datetime.now()
+    if y.month <= 3:
+        y1 = (y.year - 2000 - 1)*10000 + 401
+        y2 = (y.year - 2000)*10000 + 331
+    else:
+        y1 = (y.year - 2000)*10000 + 401
+        y2 = (y.year - 2000 + 1)*10000 + 331
+
+    c_suc1 = summary_sql("""status = 'R' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
+    
+    return [c1, c2, c3, c4, c5, c_all, c_suc1] 
 
 def summary_sql(condition):
     sql = """

@@ -58,10 +58,10 @@ class Frame(tk.LabelFrame):
             a.grid(row=0, column=i)
 
     def create_search(self):
-        a1 = myButton(self, text="Show DB")
+        a1 = myButton(self, text = "Show DB")
         a1.grid(row=0)
 
-        a2 = myButton(self, text="Save CSV")
+        a2 = myButton(self, text = "Save CSV")
         a2.grid(row=0, column=1)
 
         row1 = 1
@@ -94,9 +94,9 @@ class Frame(tk.LabelFrame):
         b6 = self.labeled_List("User: ", lists.users[1:], row2, 4, 0)
 
         a = myButton(self, text="Register", width=12)
-        a.grid(row=2, column=4)
+        a.grid(row = 2, column = 4)
         c = myButton(self, text="UnDo", width=12)
-        c.grid(row=2, column=5)
+        c.grid(row = 2, column = 5)
 
         return a, b1, b2, b3, b4, b5, b6, c
 
@@ -112,9 +112,9 @@ class Frame(tk.LabelFrame):
         b3.insert(tk.END, today_str)
 
         a = myButton(self, text="Register", width=12)
-        a.grid(row=1, column=4)
+        a.grid(row = 1, column = 4)
         c = myButton(self, text="UnDo", width=12)
-        c.grid(row=1, column=5)
+        c.grid(row = 1, column = 5)
 
         return a, b1, b2, b3, c
 
@@ -124,16 +124,16 @@ class Frame(tk.LabelFrame):
 
         b2 = self.labeled_List("Results: ", lists.results, 0, 2, 0)
 
-        a = myButton(self, text="Register", width=12)
-        a.grid(row=0, column=4)
-        c = myButton(self, text="UnDo", width=12)
-        c.grid(row=0, column=5)
+        a = myButton(self, text = "Register", width = 12)
+        a.grid(row = 0, column = 4)
+        c = myButton(self, text = "UnDo", width = 12)
+        c.grid(row = 0, column = 5)
 
         return a, b1, b2, c
     
     def new_birth(self):
         row = 0
-        row1= 1
+        row1 = 1
         val = ss.get_unsuccess_id('birth')
         b1 = self.labeled_List("Preg ID:", val, row, 0, 0)
         b2 = self.labeled_Entry("Num Male Pups:", row1, 0, 12, 4)
@@ -145,10 +145,10 @@ class Frame(tk.LabelFrame):
         today_str=today.strftime('%y%m%d')
         b4.insert(tk.END, today_str)
 
-        a = myButton(self, text = "Register", width=12)
-        a.grid(row=2, column=4)
-        c = myButton(self, text="UnDo", width=12)
-        c.grid(row=2, column=5)
+        a = myButton(self, text = "Register", width = 12)
+        a.grid(row = 2, column = 4)
+        c = myButton(self, text = "UnDo", width = 12)
+        c.grid(row = 2, column = 5)
 
         return a, b1, b2, b3, b4, c
 
@@ -166,26 +166,26 @@ class Frame(tk.LabelFrame):
         b5 = self.labeled_List("genotype: ", lists.genotype[0:], row2, 0, 0)
         b6 = self.labeled_List("Users: ", lists.users[1:], row2, 2, 0)
 
-        a = myButton(self, text = "Register", width=12)
-        a.grid(row=row2, column=4)
-        c = myButton(self, text="UnDo", width=12)
-        c.grid(row=row2, column=5)
+        a = myButton(self, text = "Register", width = 12)
+        a.grid(row = row2, column = 4)
+        c = myButton(self, text = "UnDo", width = 12)
+        c.grid(row = row2, column = 5)
 
         return a, b1, b2, b3, b4, b5, b6, c
 
     def retire(self):
         row = 0
         b1 = self.labeled_Entry("ID from: ", row, 0, 12)
-        b2= self.labeled_Entry("to: ", row, 2)
+        b2 = self.labeled_Entry("to: ", row, 2)
         b3 = self.labeled_Entry("Retire date: ", row, 4, 12)
         today = datetime.datetime.today()
         today_str=today.strftime('%y%m%d')
         b3.insert(tk.END, today_str)
 
-        a = myButton(self, text = "Register", width=12)
-        a.grid(row=1, column=4)
-        c = myButton(self, text="UnDo", width=12)
-        c.grid(row=1, column=5)
+        a = myButton(self, text = "Register", width = 12)
+        a.grid(row = 1, column = 4)
+        c = myButton(self, text="UnDo", width = 12)
+        c.grid(row = 1, column = 5)
 
         return a, b1, b2, b3, c
 
@@ -200,24 +200,24 @@ class Frame(tk.LabelFrame):
             width1 = 8
             width2 = 8
 
-        a = myLabel(self, text=text, width=width1)
-        a.grid(row=row, column=col)
-        a = myEntry(self, width=width2)
-        a.grid(row=row, column=col+1)
+        a = myLabel(self, text = text, width = width1)
+        a.grid(row = row, column = col)
+        a = myEntry(self, width = width2)
+        a.grid(row = row, column = col+1)
 
         return a
 
     def labeled_List(self, text, val, row, col, n, *args):
-        a = myLabel(self, text=text)
-        a.grid(row=row, column=col)
+        a = myLabel(self, text = text)
+        a.grid(row = row, column = col)
         if len(args) == 1:
-            a = myCombobox(self, width=args[0])
+            a = myCombobox(self, width = args[0])
         else:
             a = myCombobox(self)
 
         a["values"] = val
         a.current(n)
-        a.grid(row=row, column=col+1)
+        a.grid(row = row, column = col+1)
         
         return a
 
@@ -228,17 +228,21 @@ class Frame(tk.LabelFrame):
         t3 = """ {} mice (F) are 'P'. """.format(s[3])
         t4 = """ {} mice (F) are 'W'. """.format(s[4])
         t5 = """ Total {} mice are breeding now. """.format(s[5])
-        txt1 = myLabel(self, text=t1)
-        txt2 = myLabel(self, text=t2)
-        txt3 = myLabel(self, text=t3)
-        txt4 = myLabel(self, text=t4)
-        txt5 = myLabel(self, text=t5)
+        t6 = """ {} mice were killed in this year""".format(s[6])
+
+        txt1 = myLabel(self, text = t1)
+        txt2 = myLabel(self, text = t2)
+        txt3 = myLabel(self, text = t3)
+        txt4 = myLabel(self, text = t4)
+        txt5 = myLabel(self, text = t5)
+        txt6 = myLabel(self, text = t6)
         
-        txt1.pack(fill="x")
-        txt2.pack(fill="x")
-        txt3.pack(fill="x")
-        txt4.pack(fill="x")
-        txt5.pack(fill="x")
+        txt1.pack(fill = "x")
+        txt2.pack(fill = "x")
+        txt3.pack(fill = "x")
+        txt4.pack(fill = "x")
+        txt5.pack(fill = "x")
+        txt6.pack(fill = "x")
         
         return 1
 
@@ -249,11 +253,11 @@ class Frame(tk.LabelFrame):
 ### Buttons ###
 class myButton(tk.Button):
     """ Event Menu 用のボタン"""
-    def __init__(self, master=None, cnf={}, **kw):
+    def __init__(self, master = None, cnf = {}, **kw):
         tk.Button.__init__(self, master, cnf, **kw)
         self.configure(
-            font=("",12),
-            width=10
+            font = ("", 12),
+            width = 10
         )
         self.configure(**kw)
 
@@ -261,8 +265,8 @@ class myLabel(tk.Label):
     def __init__(self, master=None, cnf={}, **kw):
         tk.Label.__init__(self, master, cnf, **kw)
         self.configure(
-            font=("",12),
-            width=8
+            font = ("", 12),
+            width = 8
         )
         self.configure(**kw)
 
@@ -270,23 +274,23 @@ class myEntry(tk.Entry):
     def __init__(self, master=None, cnf={}, **kw):
         tk.Entry.__init__(self, master, cnf, **kw)
         self.configure(
-            font=("",12),
-            width=8
+            font = ("", 12),
+            width = 8
         )
 
 class myCombobox(ttk.Combobox):
     def __init__(self, master=None, cnf={}, **kw):
         ttk.Combobox.__init__(self, master, **kw)
         self.configure(
-            state="readonly", 
-            width=8)
+            state = "readonly", 
+            width = 8)
         self.configure(**kw)
 
 #### Window に DB テーブルの表示 ####
 class ShowDB():
     def __init__(self, master, n, which):
-        self.master=master
-        self.padding=n
+        self.master = master
+        self.padding = n
         
         if which == "buy":
             self.tree = self.show_select()
@@ -303,16 +307,16 @@ class ShowDB():
 
     def show(self, list_width, list_text):
         #空のテーブルを表示
-        tree = ttk.Treeview(self.master, padding=self.padding)
+        tree = ttk.Treeview(self.master, padding = self.padding)
         l = len(list_width)
         l_col = tuple(range(1, l+1))
         tree["column"] = l_col
-        tree["show"]="headings" 
+        tree["show"] = "headings" 
 
         for i in range(1, l+1):
-            tree.column(i, width=list_width[i-1])
-            tree.heading(i, text=list_text[i-1])
-        tree.pack(fill="x")
+            tree.column(i, width = list_width[i-1])
+            tree.heading(i, text = list_text[i-1])
+        tree.pack(fill = "x")
         return tree
 
     def show_select(self):
@@ -354,7 +358,7 @@ class ShowDB():
 ##### open sub window ###
 def new_buy_window():
     sub = OpenWindow("New Buy", "700x300").sub()
-    f = Frame(sub, text="Select Menu")
+    f = Frame(sub, text = "Select Menu")
     a = f.new_buy()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, "buy")
     sub_tree = ShowDB(sub, 20, "buy")
@@ -364,7 +368,7 @@ def new_buy_window():
 
 def new_mate_window():
     sub = OpenWindow("New Mate", "700x500").sub()
-    f = Frame(sub, text="Select Menu")
+    f = Frame(sub, text = "Select Menu")
     a = f.new_mate()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'mate')
     sub_tree = ShowDB(sub, 20, "mate")
@@ -373,7 +377,7 @@ def new_mate_window():
 
 def new_pregnancy_window():
     sub = OpenWindow("New Pregnancy", "700x500").sub()
-    f = Frame(sub, text="Select Menu")
+    f = Frame(sub, text = "Select Menu")
     a = f.new_pregnancy()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'pregnancy')
     sub_tree = ShowDB(sub, 20, "pregnancy")
@@ -385,7 +389,7 @@ def new_pregnancy_window():
 
 def new_birth_window():
     sub = OpenWindow("New Birth Event", "700x500").sub()
-    f = Frame(sub, text="Select Menu")
+    f = Frame(sub, text = "Select Menu")
     a = f.new_birth()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'birth')
     sub_tree = ShowDB(sub, 20, "birth")
@@ -396,7 +400,7 @@ def new_birth_window():
 
 def new_wean_window():
     sub = OpenWindow("New Wean Event", "700x500").sub()
-    f = Frame(sub, text="Select Menu")
+    f = Frame(sub, text = "Select Menu")
     a = f.new_wean()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'wean')
     sub_tree = ShowDB(sub, 20, "wean")
@@ -406,7 +410,7 @@ def new_wean_window():
 
 def retire_window():
     sub = OpenWindow("Retire", "700x500").sub()
-    f = Frame(sub, text="Select Menu")
+    f = Frame(sub, text = "Select Menu")
     a = f.retire()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'retire')
     sub_tree = ShowDB(sub, 20, "retire")
