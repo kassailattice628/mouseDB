@@ -1,7 +1,7 @@
 
 import sqlite3
 
-conn = sqlite3.connect("mouseDB.sqlite3")
+conn = sqlite3.connect("mouseDB_181106.sqlite3")
 conn.execute('PRAGMA foreign_keys = 1')
 
 def create_table(sql):

@@ -487,6 +487,7 @@ def get_summary():
     c_all = summary_sql("status IS NOT 'R'")
     
     y = datetime.datetime.now()
+    #DBでの西暦が2文字表記なので，調整
     if y.month <= 3:
         y1 = (y.year - 2000 - 1)*10000 + 401
         y2 = (y.year - 2000)*10000 + 331
