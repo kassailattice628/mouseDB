@@ -14,7 +14,7 @@ class select_list():
         self.menu = ("Buy", "Mate", "Pregnancy", "Birth", "Wean", "Retire")
         self.sex = ("Any", "M", "F")
         self.state = ("Any", "B","M","P","W","R")
-        self.line = ("Any", "C57BL/6N", "GAD67-GFP","VGAT-Venus","VGAT-tdTomato")
+        self.line = ("Any", "C57BL/6N", "GAD67-GFP","VGAT-Venus","VGAT-tdTomato", "VGAT-IRES-Cre")
         self.genotype = ("wt", "+/-", "-/-", "unknown")
         self.users = ("Any", "KASAI")
         self.results = ('Success', 'Fail')
