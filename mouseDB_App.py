@@ -12,7 +12,7 @@ class mouseDB_App():
 
     def run(self):
         #main Window
-        root = window.OpenWindow("MOUSE DB_KASAI", "800x550").main()
+        root = window.OpenWindow("MOUSE DB_KASAI", "800x600").main()
 
         #Frame0
         f0 = window.Frame(root, text="Event Menu")

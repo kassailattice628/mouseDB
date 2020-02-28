@@ -485,7 +485,7 @@ def get_summary():
     c4 = summary_sql("status = 'P'")
     c5 = summary_sql("status = 'W'")
     c_all = summary_sql("status IS NOT 'R'")
-    
+
     y = datetime.datetime.now()
     #DBでの西暦が2文字表記なので，調整
     if y.month <= 3:
@@ -496,8 +496,19 @@ def get_summary():
         y2 = (y.year - 2000 + 1)*10000 + 331
 
     c_suc1 = summary_sql("""status = 'R' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
+
+    #c_suc_lines
+    cs_l1 = summary_sql("""status = 'R' AND line = 'C57BL/6N' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
+    cs_l2 = summary_sql("""status = 'R' AND line = 'GAD67-GFP' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
+    cs_l3 = summary_sql("""status = 'R' AND line = 'VGAT-Venus' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
+    cs_l4 = summary_sql("""status = 'R' AND line = 'VGAT-tdTomato' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
+    cs_l5 = summary_sql("""status = 'R' AND line = 'VGAT-IRES-Cre' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
     
-    return [c1, c2, c3, c4, c5, c_all, c_suc1] 
+    c_suc_each = [cs_l1, cs_l2, cs_l3, cs_l4, cs_l5]
+    print(c_suc_each)
+    print(y1)
+    print(y2)
+    return [c1, c2, c3, c4, c5, c_all, c_suc1, c_suc_each] 
 
 def summary_sql(condition):
     sql = """

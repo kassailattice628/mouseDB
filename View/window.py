@@ -230,12 +230,15 @@ class Frame(tk.LabelFrame):
         t5 = """ Total {} mice are breeding now. """.format(s[5])
         t6 = """ {} mice were killed in this year""".format(s[6])
 
+        t7 = """{}(WT), {}(GAD), {}(V-Ven), {}(V-Tom) and {}(V-Cre) were killed""".format(s[7][0], s[7][1], s[7][2], s[7][3], s[7][4])
+
         txt1 = myLabel(self, text = t1)
         txt2 = myLabel(self, text = t2)
         txt3 = myLabel(self, text = t3)
         txt4 = myLabel(self, text = t4)
         txt5 = myLabel(self, text = t5)
         txt6 = myLabel(self, text = t6)
+        txt7 = myLabel(self, text = t7)
         
         txt1.pack(fill = "x")
         txt2.pack(fill = "x")
@@ -243,6 +246,7 @@ class Frame(tk.LabelFrame):
         txt4.pack(fill = "x")
         txt5.pack(fill = "x")
         txt6.pack(fill = "x")
+        txt7.pack(fill = "x")
         
         return 1
 
