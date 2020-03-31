@@ -52,12 +52,14 @@ class Frame(tk.LabelFrame):
         self.pack(fill="x")
 
     def create_event(self):
+        # Main Menu Buttons
         callbacks = [new_buy_window, new_mate_window, new_pregnancy_window, new_birth_window, new_wean_window, retire_window]
         for i in range(0,6):
             a = myButton(self, text=lists.menu[i], command=callbacks[i])
             a.grid(row=0, column=i)
 
     def create_search(self):
+        # Main Search Menu
         a1 = myButton(self, text = "Show DB")
         a1.grid(row=0)
 
@@ -77,6 +79,7 @@ class Frame(tk.LabelFrame):
 
         return a1, b1, b2, b3, b4, b5, b6, b7, b8, a2
 
+########## Main Menu Button Fcn ##########
     def new_buy(self):
         row=0
         row2=1
@@ -290,7 +293,7 @@ class myCombobox(ttk.Combobox):
             width = 8)
         self.configure(**kw)
 
-#### Window に DB テーブルの表示 ####
+########## Window に DB テーブルの表示 ##########
 class ShowDB():
     def __init__(self, master, n, which):
         self.master = master
@@ -387,8 +390,9 @@ def new_pregnancy_window():
     sub_tree = ShowDB(sub, 20, "pregnancy")
     
     sub_tree2 = ShowDB(sub, 20, "mate")
-    ss.latest10(sub_tree2.tree, "pregnancy")
-
+    #ss.latest10(sub_tree2.tree, "pregnancy")
+    #とりあえず全部出すように変更
+    ss.latest_all(sub_tree2.tree, "pregnancy")
     a[-1]["command"] = lambda:ss.undo()
 
 def new_birth_window():

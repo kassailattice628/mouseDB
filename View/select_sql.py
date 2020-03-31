@@ -199,6 +199,21 @@ def select_new(tree, ind, which):
 
 ########## 最新 10 のデータを表示 ##########
 # <= window.py から
+def latest_all(tree, which):
+    if which == "pregnancy":
+        sql = """
+        SELECT mate_id, female_id, male_id, start_date, end_date, success
+        FROM mate WHERE success IS NULL
+        """
+
+    elif which == "birth":
+        sql = """
+        SELECT h.preg_id, h.mate_id, m.male_id, m.female_id
+        FROM history h JOIN mate m ON h.mate_id = m.mate_id JOIN pregnancy p ON h.preg_id = p.preg_id
+        WHERE p.success IS NULL
+        """
+    Update_View(tree, sql)
+
 def latest10(tree, which):
     if which == "pregnancy":
         sql = """
@@ -207,7 +222,7 @@ def latest10(tree, which):
         WHERE success IS NULL AND mate_id >= (
             SELECT MAX(mate_id) from mate) -9
         """
-
+        
     elif which == "birth":
         sql = """
         SELECT h.preg_id, h.mate_id, m.male_id, m.female_id
@@ -504,10 +519,9 @@ def get_summary():
     cs_l4 = summary_sql("""status = 'R' AND line = 'VGAT-tdTomato' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
     cs_l5 = summary_sql("""status = 'R' AND line = 'VGAT-IRES-Cre' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
     
+    #number of suc for each line
     c_suc_each = [cs_l1, cs_l2, cs_l3, cs_l4, cs_l5]
-    print(c_suc_each)
-    print(y1)
-    print(y2)
+ 
     return [c1, c2, c3, c4, c5, c_all, c_suc1, c_suc_each] 
 
 def summary_sql(condition):
