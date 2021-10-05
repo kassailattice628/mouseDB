@@ -518,9 +518,10 @@ def get_summary():
     cs_l3 = summary_sql("""status = 'R' AND line = 'VGAT-Venus' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
     cs_l4 = summary_sql("""status = 'R' AND line = 'VGAT-tdTomato' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
     cs_l5 = summary_sql("""status = 'R' AND line = 'VGAT-IRES-Cre' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
+    cs_l6 = summary_sql("""status = 'R' AND line = 'Chat-IRES-Cre' AND retire_date >= {} AND retire_date <= {}""".format(y1, y2))
     
     #number of suc for each line
-    c_suc_each = [cs_l1, cs_l2, cs_l3, cs_l4, cs_l5]
+    c_suc_each = [cs_l1, cs_l2, cs_l3, cs_l4, cs_l5, cs_l6]
  
     return [c1, c2, c3, c4, c5, c_all, c_suc1, c_suc_each] 
 

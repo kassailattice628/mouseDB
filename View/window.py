@@ -14,7 +14,9 @@ class select_list():
         self.menu = ("Buy", "Mate", "Pregnancy", "Birth", "Wean", "Retire")
         self.sex = ("Any", "M", "F")
         self.state = ("Any", "B","M","P","W","R")
-        self.line = ("Any", "C57BL/6N", "GAD67-GFP","VGAT-Venus","VGAT-tdTomato", "VGAT-IRES-Cre")
+        #When you will add a new tg-line
+        #change "def show_summary" and "def get_summary in select_sql"
+        self.line = ("Any", "C57BL/6N", "GAD67-GFP","VGAT-Venus","VGAT-tdTomato", "VGAT-IRES-Cre", "Chat-IRES-Cre")
         self.genotype = ("wt", "+/-", "homo", "unknown")
         self.users = ("Any", "KASAI")
         self.results = ('Success', 'Fail')
@@ -232,8 +234,7 @@ class Frame(tk.LabelFrame):
         t4 = """ {} mice (F) are 'W'. """.format(s[4])
         t5 = """ Total {} mice are breeding now. """.format(s[5])
         t6 = """ {} mice were killed in this year""".format(s[6])
-
-        t7 = """{}(WT), {}(GAD), {}(V-Ven), {}(V-Tom) and {}(V-Cre) were killed""".format(s[7][0], s[7][1], s[7][2], s[7][3], s[7][4])
+        t7 = """{}(WT), {}(GAD67-GFP), {}(V-Venus), {}(V-Tomato), {}(V-Cre) and {}(Chat-Cre) were killed""".format(s[7][0], s[7][1], s[7][2], s[7][3], s[7][4], s[7][5])
 
         txt1 = myLabel(self, text = t1)
         txt2 = myLabel(self, text = t2)
