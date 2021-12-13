@@ -56,7 +56,8 @@ class Frame(tk.LabelFrame):
     def create_event(self):
         # Main Menu Buttons
         callbacks = [new_buy_window, new_mate_window, new_pregnancy_window, new_birth_window, new_wean_window, retire_window]
-        for i in range(0,6):
+        for i in range(0, len(lists.menu)):
+            #lists is defined by select_list
             a = myButton(self, text=lists.menu[i], command=callbacks[i])
             a.grid(row=0, column=i)
 

@@ -99,8 +99,9 @@ def select_sql(w, t):
     """
     FROM individual
     WHERE {0} AND {1} AND {2} AND {3} AND {4} AND {5}
-    ORDER BY mouse_id
+    ORDER BY mouse_id desc
     """.format(cond1, cond2, cond3, cond4, cond5, cond6))
+    #desc で mouse ID を降順 desnding に
 
     return sql
 ### END of "select_sql"
