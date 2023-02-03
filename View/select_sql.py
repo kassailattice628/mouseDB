@@ -376,13 +376,19 @@ def add_new_wean(which, p):
     return last_i
 
 def retire(p):
-    if p[0] == '' or p[1] == '':
-        show_warn('Please put ID in both FROM and TO fields!')
-        return 0
-    v1 = check_id(p[0:2])
-    if v1 == 0:
-        return 0
-    ids = range(int(p[0]), int(p[1]) +1)
+    #if p[0] == '' or p[1] == '':
+    #    show_warn('Please put ID in both FROM and TO fields!')
+    #    return 0
+    if p[0] == '':
+        show_warn('Please put at lease 1 ID in the FROM filed!')
+    elif p[0] != '' and p[1] == '':
+        ids = range(int(p[0]), int(p[0])+1)
+    else:
+        v1 = check_id(p[0:2])
+        if v1 == 0:
+            return 0
+        ids = range(int(p[0]), int(p[1]) +1)
+
     for i in ids:
         s = get_status(i)
         if s != 'R':
@@ -393,7 +399,10 @@ def retire(p):
             change_state(i, 'R')
         else:
             print('id:"{}" has already been set as "R".'.format(i))
-    return int(p[1])
+    if p[1] == '':
+        return int(p[0])
+    else:
+        return int(p[1])
 
 def add_to_history(which, i, mate_id = []):
     if which == 'mate_id':
