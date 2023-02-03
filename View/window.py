@@ -291,7 +291,7 @@ class myCombobox(ttk.Combobox):
     def __init__(self, master=None, cnf={}, **kw):
         ttk.Combobox.__init__(self, master, **kw)
         self.configure(
-            state = "readonly", 
+            state = "readonly",
             width = 8)
         self.configure(**kw)
 
@@ -320,7 +320,7 @@ class ShowDB():
         l = len(list_width)
         l_col = tuple(range(1, l+1))
         tree["column"] = l_col
-        tree["show"] = "headings" 
+        tree["show"] = "headings"
 
         for i in range(1, l+1):
             tree.column(i, width = list_width[i-1])
