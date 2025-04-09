@@ -366,7 +366,7 @@ class ShowDB():
 
 ##### open sub window ###
 def new_buy_window():
-    sub = OpenWindow("New Buy", "700x300").sub()
+    sub = OpenWindow("New Buy", "900x300").sub()
     f = Frame(sub, text = "Select Menu")
     a = f.new_buy()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, "buy")
@@ -376,7 +376,7 @@ def new_buy_window():
     return sub_tree
 
 def new_mate_window():
-    sub = OpenWindow("New Mate", "700x500").sub()
+    sub = OpenWindow("New Mate", "900x500").sub()
     f = Frame(sub, text = "Select Menu")
     a = f.new_mate()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'mate')
@@ -385,7 +385,7 @@ def new_mate_window():
     a[-1]["command"] = lambda:ss.undo()
 
 def new_pregnancy_window():
-    sub = OpenWindow("New Pregnancy", "700x500").sub()
+    sub = OpenWindow("New Pregnancy", "800x600").sub()
     f = Frame(sub, text = "Select Menu")
     a = f.new_pregnancy()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'pregnancy')
@@ -398,7 +398,7 @@ def new_pregnancy_window():
     a[-1]["command"] = lambda:ss.undo()
 
 def new_birth_window():
-    sub = OpenWindow("New Birth Event", "700x500").sub()
+    sub = OpenWindow("New Birth Event", "900x500").sub()
     f = Frame(sub, text = "Select Menu")
     a = f.new_birth()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'birth')
@@ -409,7 +409,7 @@ def new_birth_window():
     a[-1]["command"] = lambda:ss.undo()
 
 def new_wean_window():
-    sub = OpenWindow("New Wean Event", "700x500").sub()
+    sub = OpenWindow("New Wean Event", "900x500").sub()
     f = Frame(sub, text = "Select Menu")
     a = f.new_wean()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'wean')
@@ -419,7 +419,7 @@ def new_wean_window():
     a[-1]["command"] = lambda:ss.undo()
 
 def retire_window():
-    sub = OpenWindow("Retire", "700x500").sub()
+    sub = OpenWindow("Retire", "800x500").sub()
     f = Frame(sub, text = "Select Menu")
     a = f.retire()
     a[0]["command"] = lambda:make_register(sub_tree.tree, a, 'retire')
