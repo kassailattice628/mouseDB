@@ -7,6 +7,7 @@ View/__pycache__/
 View/select_sql.pyc
 View/window.pyc
 createDB_from_csv/
+mouseDB.sqlite3
 #createDB_from_csv/__pycache__/
 #createDB_from_csv/df_181106.csv
 #createDB_from_csv/import_181106.py
